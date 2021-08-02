@@ -1,0 +1,7 @@
+version: '3'
+services:
+  nginx-echo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nginx-echo:latest
