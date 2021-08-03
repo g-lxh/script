@@ -1,0 +1,50 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    hostname: "192.168.2.60"
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","wget 127.0.0.1:9100/metrics -O /dev/null 2>&1"]
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    volumes:
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
+  prometheus:
+    image: prom/prometheus:latest
+    user: "$UID:$GID"
+    container_name: prometheus
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","wget 127.0.0.1:9090/-/healthy -O /dev/null 2>&1"]
+    ports:
+      - 9090:9090
+    volumes:
+      - ./data/prometheus/conf/:/etc/prometheus/
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","wget 127.0.0.1:3000/api/health  -O /dev/null 2>&1"]
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data/grafana:/var/lib/grafana/
