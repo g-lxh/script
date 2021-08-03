@@ -1,4 +1,10 @@
 version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
 x-milvus: &default-milvus
   image: milvusdb/milvus:1.1.0-cpu-d050721-5e559c
   restart: always
@@ -6,11 +12,8 @@ x-milvus: &default-milvus
     - "19530"
     - "19121"
   healthcheck: 
+    <<: *default-healthcheck
     test: ["CMD-SHELL","curl -s 127.0.0.1:19121 > /dev/null 2>&1"]
-    interval: 30s
-    timeout: 5s
-    retries: 2
-    start_period: 10s
 
 services:
   milvus_nginx:
@@ -18,11 +21,8 @@ services:
     container_name: milvus_nginx
     restart: always
     healthcheck: 
+      <<: *default-healthcheck
       test: ["CMD-SHELL","curl -s 127.0.0.1:19121 > /dev/null 2>&1"]
-      interval: 30s
-      timeout: 5s
-      retries: 2
-      start_period: 10s
     ports:
       - 19530:19530
       - 19121:19121
