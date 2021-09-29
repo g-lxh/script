@@ -1,0 +1,27 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  zendao:
+    image: idoop/zentao:latest
+    container_name: zendao
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 80" ]
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "80:80"
+      - "3306:3306"
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/zendao/:/opt/zbox/

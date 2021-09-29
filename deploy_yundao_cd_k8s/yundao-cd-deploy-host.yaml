@@ -1,0 +1,67 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-deploy-host
+  namespace: yundao-prod
+  labels:
+    SYS_APP: yundao-cd-deploy-host
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-deploy-host
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-deploy-host
+    spec:
+      containers:
+      - name: yundao-cd-deploy-host
+        image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-deploy-host-466/cd-deploy-host:0.9.1
+        ports:
+        - containerPort: 5004
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        - name: ctgydpaas_app_name
+          value: cddeployhost
+        - name: ctgydpaas_app_basepkg
+          value: com.yundao.cd.deploy.host
+        - name: ctgydpaas_app_nameserver
+          value: http://yundao-cd-eureka.yundao-prod.svc.cluster.local.:8761/eureka
+        - name: ctgydpaas_apollo_meta
+          value: http://10.128.22.189:31063
+        - name: ctgydpaas_apollo_namespaces
+          value: application.yml
+        - name: ctgydpaas_apollo_appid
+          value: yundao-cd-deploy-host
+        - name: ctgydpaas_apollo_cluster
+        resources:
+          limits:
+            cpu: '2'
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        imagePullPolicy: Always
+      restartPolicy: Always
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-deploy-host
+  labels:
+    SYS_APP: yundao-cd-deploy-host
+spec:
+  ports:
+  - name: yundao-cd-deploy-host
+    protocol: TCP
+    port: 5004
+    targetPort: 5004
+    nodePort: 26937
+  selector:
+    SYS_APP: yundao-cd-deploy-host
+  type: NodePort

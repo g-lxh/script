@@ -1,0 +1,38 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 2181" ]
+    ports:
+      - "2181:2181"
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+
+  kafka:
+    image: wurstmeister/kafka
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 9092" ]
+    depends_on: [ zookeeper ]
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - /var/run/docker.sock:/var/run/docker.sock

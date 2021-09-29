@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxx-21-dynamic-city-manger
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cxx-21-dynamic-city-manger
+  template:
+    metadata:
+      labels:
+        app: cxx-21-dynamic-city-manger
+    spec:
+      containers:
+      - env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "0"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: video,compute,utility
+        - name: EurekaClientEnable
+          value: "true"
+        - name: EurekaInstanceName
+          value: osmagic-algo-dynamic
+        - name: EurekaInstanceIp
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: EurekaInstancePort
+          value: "10000"
+        - name: EurekaClientServiceUrlDefaultZone
+          value: 10.10.8.5:46101
+        - name: EurekaInstanceHeartRate
+          value: "30"
+        image: hub.kaolayouran.cn:5000/osmagic-all/micro-algo-dynamic/city-manger:20210918124906-145
+        imagePullPolicy: Always
+        name: cxx-21-dynamic-city-manger
+        ports:
+        - containerPort: 10000
+          name: tcp
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - mountPath: /root/koala/osmagic/serial
+          name: cxx-21-dynamic-city-manger-data
+      restartPolicy: Always
+      volumes:
+      - hostPath:
+          path: /data/OsmagicData/data/cxx-21-dynamic-city-manger-serial
+          type: ""
+        name: cxx-21-dynamic-city-manger-data

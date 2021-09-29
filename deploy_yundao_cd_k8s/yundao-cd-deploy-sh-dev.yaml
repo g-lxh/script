@@ -1,0 +1,84 @@
+server:
+  port: 5003
+
+#datasource
+spring:
+  datasource:
+    url: jdbc:mysql://10.128.22.189:31280/yundao-cd?characterEncoding=utf8&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+    timeBetweenEvictionRunsMillis: 60000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+  main:
+    allow-bean-definition-overriding: true
+
+  #kafka相关配置
+  kafka:
+    #kafka服务器地址
+    bootstrap-servers: 10.128.92.138:9092
+    topic: cddeployhost
+    #key-value序列化
+    consumer:
+      group-id: log
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+
+# 基础能力地址
+bs:
+  serviceAddress: http://10.128.22.189:31077
+# 软件资产地址
+sar:
+  serviceAddress: http://10.128.22.189:31077
+# 资源管理地址
+rm:
+  serviceAddress: http://10.128.22.189:31077
+# 敏捷开发中心
+ad:
+  serviceAddress: http://10.128.22.189:31525
+# 自动化测试
+at:
+  serviceAddress: http://10.128.22.189:31947
+# 持续集成
+ci:
+  serviceAddress: http://10.128.22.189:31077
+# aiOps
+aiops:
+  isOpen: false
+  serviceAddress: http://10.128.86.64:8000
+  appId: 0111f5aeaf471bf5ff831fe3c315c4d0
+  appKey: b5021e5598b8c2f9d822d0d9706f9b89
+# nginx 网关
+nginx:
+  service-address: http://10.128.22.189:32915
+# 部署中心-配置服务
+cd-config:
+  service-address: http://cdconfig
+# 适配服务（传统主机、集团CCSE、原生K8S、省内自定义API）
+cd-adapt:
+  host:
+    service-address: http://cddeployhost
+
+# 开启健康检查、指标、info信息、接口信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, health, info, mappings, loggers
+  endpoint:
+    health:
+      show-details: always
+
+# 日志调整
+logging:
+  level:
+    com.yundao.cd.deploy.mapper: DEBUG

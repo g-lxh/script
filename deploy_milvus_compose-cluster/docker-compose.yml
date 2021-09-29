@@ -1,0 +1,72 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+x-milvus: &default-milvus
+  image: milvusdb/milvus:1.1.0-cpu-d050721-5e559c
+  restart: always
+  expose: 
+    - "19530"
+    - "19121"
+  healthcheck:
+    <<: *default-healthcheck
+    test: [ "CMD-SHELL","nc -z 127.0.0.1 19121" ]
+
+services:
+  milvus_nginx:
+    image: nginx:latest
+    container_name: milvus_nginx
+    restart: always
+    healthcheck: 
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 19121" ]
+    ports:
+      - 19530:19530
+      - 19121:19121
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - /etc/ssl/private/:/etc/ssl/private/
+      - ./data/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
+  milvus_cpu-rw:
+    <<: *default-milvus
+    container_name: milvus_cpu-rw
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/milvus_cpu/db/:/var/lib/milvus/db/
+      - ./data/milvus_cpu/logs/:/var/lib/milvus/logs/
+      - ./data/milvus_cpu/wal/:/var/lib/milvus/wal/
+      - ./data/milvus_cpu-rw/conf/:/var/lib/milvus/conf/
+  milvus_cpu-ro-01:
+    <<: *default-milvus
+    container_name: milvus_cpu-ro-01
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/milvus_cpu/db/:/var/lib/milvus/db/
+      - ./data/milvus_cpu/logs/:/var/lib/milvus/logs/
+      - ./data/milvus_cpu/wal/:/var/lib/milvus/wal/
+      - ./data/milvus_cpu-ro-01/conf/:/var/lib/milvus/conf/
+  milvus_cpu-ro-02:
+    <<: *default-milvus
+    container_name: milvus_cpu-ro-02
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/milvus_cpu/db/:/var/lib/milvus/db/
+      - ./data/milvus_cpu/logs/:/var/lib/milvus/logs/
+      - ./data/milvus_cpu/wal/:/var/lib/milvus/wal/
+      - ./data/milvus_cpu-ro-02/conf/:/var/lib/milvus/conf/

@@ -1,0 +1,68 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-gateway
+  labels:
+    SYS_APP: yundao-cd-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-gateway
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-gateway
+    spec:
+      containers:
+      - name: yundao-cd-gateway
+        image: 10.238.9.17:8443/yundao-cd-gateway-349/cd-gateway:0.4.0
+        ports:
+        - containerPort: 8081
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        - name: ctgydpaas_app_name
+          value: cdgateway
+        - name: ctgydpaas_app_nameserver
+          value: http://10.238.9.205:18080/eureka,http://10.238.9.216:18080/eureka,http://10.238.9.232:18080/eureka
+        - name: ctgydpaas_apollo_meta
+          value: http://10.238.9.11:31028
+        - name: ctgydpaas_apollo_namespaces
+          value: application.yml
+        - name: ctgydpaas_apollo_appid
+          value: yundao-cd-gateway
+        - name: ctgydpaas_apollo_cluster
+          value: PROD
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        imagePullPolicy: Always
+      restartPolicy: Always
+      nodeSelector:
+        cluseterLabel: 726f7f7c-496f-4eed-95c0-6039479629ed
+      imagePullSecrets:
+        - name: harbor-secret-10-238-9-17
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-gateway
+  labels:
+    SYS_APP: yundao-cd-gateway
+spec:
+  ports:
+  - name: yundao-cd-gateway
+    protocol: TCP
+    port: 8081
+    targetPort: 8081
+    nodePort: 30314
+  selector:
+    SYS_APP: yundao-cd-gateway
+  type: NodePort

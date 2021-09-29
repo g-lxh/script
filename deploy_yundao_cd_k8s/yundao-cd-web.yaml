@@ -1,0 +1,176 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-web
+  labels:
+    SYS_APP: yundao-cd-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-web
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-web
+    spec:
+      volumes:
+      - name: yundao-cd-web-cm-v
+        configMap:
+          name: yundao-cd-web-cm
+      containers:
+      - name: yundao-cd-web
+        image: 10.238.9.17:8443/yundao-cd-web-392/cd-web:0.11.2
+        ports:
+        - containerPort: 8081
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: yundao-cd-web-cm-v
+          mountPath: /usr/share/nginx/html/config/config.production.js
+          subPath: config.production.js
+        - name: yundao-cd-web-cm-v
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+        imagePullPolicy: Always
+      restartPolicy: Always
+      nodeSelector:
+        cluseterLabel: 726f7f7c-496f-4eed-95c0-6039479629ed
+      imagePullSecrets:
+        - name: harbor-secret-10-238-9-17
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-web
+  labels:
+    SYS_APP: yundao-cd-web
+spec:
+  ports:
+  - name: yundao-cd-web
+    protocol: TCP
+    port: 30311
+    targetPort: 30311
+    nodePort: 30311
+  selector:
+    SYS_APP: yundao-cd-web
+  type: NodePort
+
+---
+
+apiVersion: v1
+metadata:
+  name: yundao-cd-web-cm
+data:
+  config.production.js: |
+    /**
+    * 配置规则：
+    * （1）'$'符号开头的合法变量名
+    * （2）配置环境变量固定变量名为：
+    *  (3) 后端接口基地址为：
+    */
+    window.$LxConfig = {
+        $env: "",
+        $baseUrl: "",
+        $yundaoCdConfig:"/api/cd/v1/cdgateway/cdconfig",
+        $yundaoCddeploy:"/api/cd/v1/cdgateway/cddeploy",
+        $timeout: 20 * 1000, //接口超时时间：60秒
+        $uploadFile:"http://10.238.9.11:30311/cddeploy/api/cd/v1/assets/uploadFile",//附件上传-部署中心前端代理deploy
+        //认证信息
+        auth:{
+            authPath:"http://10.238.9.11:30311/webadmin/api/cd/v1/web-admin/redirect?redirectUrl=",//认证地址-部署中心前端代理webadmin
+            redirectUri:"http://10.238.9.11:30311/%23/getToken",//回调地址-部署中心前端
+            overViewUrl:"http://10.238.9.11:30086",//门户地址
+            // cookiePath:"/api/cd/v1",//cookie 作应路径
+            cookiePath:"",
+            expires: 1000 * 60 * 5,//cookie有效期 单位：毫秒
+        },
+        //退出跳转地址- 基础能力
+        logoutPath:"http://10.238.9.11:30091/login"
+    };
+  default.conf: |
+
+    # 注册中心服务 yundao-cd-eureka
+    upstream yundao_cd_eureka {
+      keepalive 1800;
+      keepalive_timeout 7d;
+      server 10.238.9.205:18080;
+      server 10.238.9.216:18080;
+      server 10.238.9.232:18080;
+    }
+
+    # web后端服务 yundao-cd-admin
+    upstream yundao_cd_web_admin {
+      keepalive 1800;
+      keepalive_timeout 7d;
+      server yundao-cd-web-admin-admin.yundao-prod.svc.cluster.local:9090;
+    }
+
+    # 网关服务 yundao-cd-gateway
+    upstream yundao_cd_gateway {
+      keepalive 1800;
+      keepalive_timeout 7d;
+      server yundao-cd-gateway-gateway.yundao-prod.svc.cluster.local:8081;
+    }
+
+    # 部署服务 yundao-cd-deploy
+    upstream yundao_cd_deploy {
+      keepalive 1800;
+      keepalive_timeout 7d;
+      server yundao-cd-deploy-deploy.yundao-prod.svc.cluster.local:5003;
+    }
+
+    # 配置服务 yundao-cd-config
+    upstream yundao_cd_config {
+      keepalive 1800;
+      keepalive_timeout 7d;
+      server yundao-cd-config-config.yundao-prod.svc.cluster.local:8080;
+    }
+
+    server {
+      listen       30311;
+
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+      }
+
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
+
+      location /api/cd/v1 {
+        proxy_set_header Host $host:$server_port;
+        proxy_pass http://yundao_cd_web_admin; # 不能以斜杠结尾
+      }
+      
+      location /cdeureka/ {
+        proxy_set_header Host $host:$server_port;
+        proxy_pass http://yundao_cd_eureka/;
+      }
+      location /webadmin/ {
+        proxy_set_header    Host    $host:$server_port;
+        proxy_pass http://yundao_cd_web_admin/;
+      }
+      location /cdgateway/ {
+        proxy_set_header Host $host:$server_port;
+        proxy_pass http://yundao_cd_gateway/;
+      }
+      location /cddeploy/ {
+        proxy_set_header Host $host:$server_port;
+        proxy_pass http://yundao_cd_deploy/;
+      }
+      location /cdconfig/ {
+        proxy_set_header Host $host:$server_port;
+        proxy_pass http://yundao_cd_config/;
+      }
+    }
+kind: ConfigMap

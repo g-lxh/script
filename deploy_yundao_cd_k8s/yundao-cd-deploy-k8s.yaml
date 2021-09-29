@@ -1,0 +1,65 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-deploy-k8s
+  labels:
+    SYS_APP: yundao-cd-deploy-k8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-deploy-k8s
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-deploy-k8s
+    spec:
+      containers:
+      - name: yundao-cd-deploy-k8s
+        image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-deploy-kubernetes-356/cd-deploy-k8s:0.9.2
+        ports:
+        - containerPort: 9001
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        - name: ctgydpaas_app_name
+          value: cddeployk8s
+        - name: ctgydpaas_app_basepkg
+          value: com.yundao.cd.deploy.k8s
+        - name: ctgydpaas_app_nameserver
+          value: http://yundao-cd-eureka.yundao-prod.svc.cluster.local.:8761/eureka
+        - name: ctgydpaas_apollo_meta
+          value: http://10.128.22.189:31063
+        - name: ctgydpaas_apollo_namespaces
+          value: application.yml
+        - name: ctgydpaas_apollo_appid
+          value: yundao-cd-deploy-k8s
+        - name: ctgydpaas_apollo_cluster
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        imagePullPolicy: Always
+      restartPolicy: Always
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-deploy-k8s
+  labels:
+    SYS_APP: yundao-cd-deploy-k8s
+spec:
+  ports:
+  - name: yundao-cd-deploy-k8s
+    protocol: TCP
+    port: 9001
+    targetPort: 9001
+    nodePort: 26937
+  selector:
+    SYS_APP: yundao-cd-deploy-k8s
+  type: NodePort

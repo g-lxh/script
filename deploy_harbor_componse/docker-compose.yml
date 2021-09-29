@@ -1,0 +1,473 @@
+version: '2.3'
+services:
+  log:
+    image: goharbor/harbor-log:v2.1.3
+    container_name: harbor-log
+    restart: always
+    dns_search: .
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/log/:/var/log/docker/:z
+      - type: bind
+        source: ./common/config/log/logrotate.conf
+        target: /etc/logrotate.d/logrotate.conf
+      - type: bind
+        source: ./common/config/log/rsyslog_docker.conf
+        target: /etc/rsyslog.d/rsyslog_docker.conf
+    ports:
+      - 127.0.0.1:1514:10514
+    networks:
+      - harbor
+  registry:
+    image: goharbor/registry-photon:v2.1.3
+    container_name: registry
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/registry:/storage:z
+      - ./common/config/registry/:/etc/registry/:z
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/registry/root.crt
+        target: /etc/registry/root.crt
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    networks:
+      - harbor
+      - harbor-clair
+    dns_search: .
+    depends_on:
+      - log
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "registry"
+  registryctl:
+    image: goharbor/harbor-registryctl:v2.1.3
+    container_name: registryctl
+    env_file:
+      - ./common/config/registryctl/env
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/registry:/storage:z
+      - ./common/config/registry/:/etc/registry/:z
+      - type: bind
+        source: ./common/config/registryctl/config.yml
+        target: /etc/registryctl/config.yml
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    networks:
+      - harbor
+    dns_search: .
+    depends_on:
+      - log
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "registryctl"
+  postgresql:
+    image: goharbor/harbor-db:v2.1.3
+    container_name: harbor-db
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/database:/var/lib/postgresql/data:z
+    networks:
+      harbor:
+      harbor-notary:
+        aliases:
+          - harbor-db
+      harbor-clair:
+        aliases:
+          - harbor-db
+    dns_search: .
+    env_file:
+      - ./common/config/db/env
+    depends_on:
+      - log
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "postgresql"
+  core:
+    image: goharbor/harbor-core:v2.1.3
+    container_name: harbor-core
+    env_file:
+      - ./common/config/core/env
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/ca_download/:/etc/core/ca/:z
+      - /Users/linxh/ops/deploy_harbor_componse/data/:/data/:z
+      - ./common/config/core/certificates/:/etc/core/certificates/:z
+      - type: bind
+        source: ./common/config/core/app.conf
+        target: /etc/core/app.conf
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/core/private_key.pem
+        target: /etc/core/private_key.pem
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/keys/secretkey
+        target: /etc/core/key
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    networks:
+      harbor:
+      harbor-notary:
+      harbor-clair:
+        aliases:
+          - harbor-core
+      harbor-chartmuseum:
+        aliases:
+          - harbor-core
+    dns_search: .
+    depends_on:
+      - log
+      - registry
+      - redis
+      - postgresql
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "core"
+  portal:
+    image: goharbor/harbor-portal:v2.1.3
+    container_name: harbor-portal
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    volumes:
+      - type: bind
+        source: ./common/config/portal/nginx.conf
+        target: /etc/nginx/nginx.conf
+    networks:
+      - harbor
+    dns_search: .
+    depends_on:
+      - log
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "portal"
+
+  jobservice:
+    image: goharbor/harbor-jobservice:v2.1.3
+    container_name: harbor-jobservice
+    env_file:
+      - ./common/config/jobservice/env
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/job_logs:/var/log/jobs:z
+      - type: bind
+        source: ./common/config/jobservice/config.yml
+        target: /etc/jobservice/config.yml
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    networks:
+      - harbor
+      - harbor-clair
+    dns_search: .
+    depends_on:
+      - core
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "jobservice"
+  redis:
+    image: goharbor/redis-photon:v2.1.3
+    container_name: redis
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/redis:/var/lib/redis
+    networks:
+      harbor:
+      harbor-chartmuseum:
+        aliases:
+          - redis
+      harbor-clair:
+        aliases:
+          - redis
+    dns_search: .
+    depends_on:
+      - log
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "redis"
+  proxy:
+    image: goharbor/nginx-photon:v2.1.3
+    container_name: nginx
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    volumes:
+      - ./common/config/nginx:/etc/nginx:z
+      - /Users/linxh/ops/deploy_harbor_componse/data/secret/cert:/etc/cert:z
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    networks:
+      - harbor
+      - harbor-notary
+    dns_search: .
+    ports:
+      - 880:8080
+      - 8443:8443
+      - 4443:4443
+    depends_on:
+      - registry
+      - core
+      - portal
+      - log
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "proxy"
+  notary-server:
+    image: goharbor/notary-server-photon:v2.1.3
+    container_name: notary-server
+    restart: always
+    networks:
+      - notary-sig
+      - harbor-notary
+    dns_search: .
+    volumes:
+      - ./common/config/notary:/etc/notary:z
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/notary/notary-signer-ca.crt
+        target: /etc/notary/notary-signer-ca.crt
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/registry/root.crt
+        target: /etc/notary/root.crt
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    env_file:
+      - ./common/config/notary/server_env
+    depends_on:
+      - postgresql
+      - notary-signer
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "notary-server"
+  notary-signer:
+    image: goharbor/notary-signer-photon:v2.1.3
+    container_name: notary-signer
+    restart: always
+    networks:
+      harbor-notary:
+      notary-sig:
+        aliases:
+          - notarysigner
+    dns_search: .
+    volumes:
+      - ./common/config/notary:/etc/notary:z
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/notary/notary-signer.crt
+        target: /etc/notary/notary-signer.crt
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/secret/notary/notary-signer.key
+        target: /etc/notary/notary-signer.key
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    env_file:
+      - ./common/config/notary/signer_env
+    depends_on:
+      - log
+      - postgresql
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "notary-signer"
+  clair:
+    networks:
+      - harbor-clair
+    container_name: clair
+    image: goharbor/clair-photon:v2.1.3
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    cpu_quota: 50000
+    dns_search: .
+    depends_on:
+      - log
+      - postgresql
+    volumes:
+      - type: bind
+        source: ./common/config/clair/config.yaml
+        target: /etc/clair/config.yaml
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "clair"
+    env_file:
+      ./common/config/clair/clair_env
+  clair-adapter:
+    networks:
+      - harbor-clair
+    container_name: clair-adapter
+    image: goharbor/clair-adapter-photon:v2.1.3
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    cpu_quota: 50000
+    dns_search: .
+    depends_on:
+      - clair
+      - redis
+    volumes:
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "clair-adapter"
+    env_file:
+      ./common/config/clair-adapter/env
+  trivy-adapter:
+    container_name: trivy-adapter
+    image: goharbor/trivy-adapter-photon:v2.1.3
+    restart: always
+    cap_drop:
+      - ALL
+    dns_search: .
+    depends_on:
+      - log
+      - redis
+    networks:
+      - harbor
+    volumes:
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/trivy-adapter/trivy
+        target: /home/scanner/.cache/trivy
+      - type: bind
+        source: /Users/linxh/ops/deploy_harbor_componse/data/trivy-adapter/reports
+        target: /home/scanner/.cache/reports
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "trivy-adapter"
+    env_file:
+      ./common/config/trivy-adapter/env
+  chartmuseum:
+    container_name: chartmuseum
+    image: goharbor/chartmuseum-photon:v2.1.3
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    networks:
+      - harbor-chartmuseum
+    dns_search: .
+    depends_on:
+      - log
+    volumes:
+      - /Users/linxh/ops/deploy_harbor_componse/data/chart_storage:/chart_storage:z
+      - ./common/config/chartserver:/etc/chartserver:z
+      - type: bind
+        source: ./common/config/shared/trust-certificates
+        target: /harbor_cust_cert
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "tcp://127.0.0.1:1514"
+        tag: "chartmuseum"
+    env_file:
+      ./common/config/chartserver/env
+networks:
+  harbor:
+    external: false
+  harbor-notary:
+    external: false
+  notary-sig:
+    external: false
+  harbor-clair:
+    external: false
+  harbor-chartmuseum:
+    external: false

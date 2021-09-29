@@ -1,0 +1,68 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-web-admin
+  labels:
+    SYS_APP: yundao-cd-web-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-web-admin
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-web-admin
+    spec:
+      containers:
+      - name: yundao-cd-web-admin
+        image: 10.238.9.17:8443/yundao-cd-web-admin-351/cd-web-admin:0.5.0
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        - name: ctgydpaas_app_name
+          value: webadmin
+        - name: ctgydpaas_app_nameserver
+          value: http://10.238.9.205:18080/eureka,http://10.238.9.216:18080/eureka,http://10.238.9.232:18080/eureka
+        - name: ctgydpaas_apollo_meta
+          value: http://10.238.9.11:31028
+        - name: ctgydpaas_apollo_namespaces
+          value: application.yml
+        - name: ctgydpaas_apollo_appid
+          value: yundao-cd-web-admin
+        - name: ctgydpaas_apollo_cluster
+          value: PROD
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        imagePullPolicy: Always
+      restartPolicy: Always
+      nodeSelector:
+        cluseterLabel: 726f7f7c-496f-4eed-95c0-6039479629ed
+      imagePullSecrets:
+        - name: harbor-secret-10-238-9-17
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-web-admin
+  labels:
+    SYS_APP: yundao-cd-web-admin
+spec:
+  ports:
+  - name: yundao-cd-web-admin
+    protocol: TCP
+    port: 9090
+    targetPort: 9090
+    nodePort: 30315
+  selector:
+    SYS_APP: yundao-cd-web-admin
+  type: NodePort

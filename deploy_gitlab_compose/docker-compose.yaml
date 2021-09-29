@@ -1,0 +1,87 @@
+version: "3"
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+
+services: 
+  web:
+    image: gitlab/gitlab-ce:11.8.0-ce.0
+    container_name: gitlab-ce
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","nc -z 127.0.0.1 80"]
+    hostname: 127.0.0.1
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.example.com'
+        postgresql['enable'] = false
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'utf8'
+        gitlab_rails['db_host'] = 'postgresql'
+        gitlab_rails['db_port'] = '5432'
+        gitlab_rails['db_username'] = 'postgres'
+        gitlab_rails['db_password'] = 'Ideal@015'
+        gitlab_rails['db_database'] = "gitlab"
+        redis['enable'] = false
+        gitlab_rails['redis_host'] = 'redis'
+        gitlab_rails['redis_port'] = 6379
+        gitlab_rails['redis_password'] = 'Ideal@015'
+        gitlab_rails['redis_database'] = 1
+    ports:
+      - '80:80'
+      - '443:443'
+      - '22:22'
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/gitlab/config/:/etc/gitlab/
+      - ./data/gitlab/logs/:/var/log/gitlab/
+      - ./data/gitlab/data/:/var/opt/gitlab/
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","nc -z 127.0.0.1 5432"]
+    ports:
+      - "5432:5432"
+    environment: 
+      POSTGRES_PASSWORD: Ideal@015
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/gitlab/config/:/etc/gitlab/
+      - ./data/gitlab/logs/:/var/log/gitlab/
+      - ./data/gitlab/data/:/var/opt/gitlab/
+      - ./data/postgresql/data/:/var/lib/postgresql/data/
+
+  redis:
+    image: redis:latest
+    restart: always
+    container_name: redis
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","nc -z 127.0.0.1 6379"]
+    ports:
+      - "6379:6379"
+    sysctls:
+      net.core.somaxconn: 1024
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/redis/data/:/data/
+      - ./data/redis/conf/redis.conf:/etc/redis/redis.conf
+

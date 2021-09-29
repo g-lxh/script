@@ -1,0 +1,69 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-deploy-paas-direct
+  namespace: yundao-prod
+  labels:
+    SYS_APP: yundao-cd-deploy-paas-direct
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-deploy-paas-direct
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-deploy-paas-direct
+    spec:
+      containers:
+      - name: yundao-cd-deploy-paas-direct
+        image: 10.238.9.17:8443/yundao-cd-deploy-paas-357/cd-deploy-paas:0.11.1
+        ports:
+        - containerPort: 8180
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        - name: ctgydpaas_app_name
+          value: cddeploypaas
+        - name: ctgydpaas_app_basepkg
+          value: com.yundao.cd.deploy.paas
+        - name: ctgydpaas_app_nameserver
+          value: http://yundao-cd-eureka.yundao-prod.svc.cluster.local.:8761/eureka
+        - name: ctgydpaas_apollo_meta
+          value: http://10.128.22.189:31063
+        - name: ctgydpaas_apollo_namespaces
+          value: application-direct.yml
+        - name: ctgydpaas_apollo_appid
+          value: yundao-cd-deploy-paas
+        - name: ctgydpaas_apollo_cluster
+          value: SH
+        resources:
+          limits:
+            cpu: '2'
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        imagePullPolicy: Always
+      restartPolicy: Always
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-deploy-paas-direct
+  namespace: yundao-prod
+  labels:
+    SYS_APP: yundao-cd-deploy-paas-direct
+spec:
+  ports:
+  - name: yundao-cd-deploy-paas-direct
+    protocol: TCP
+    port: 8180
+    targetPort: 8180
+    nodePort: 26937
+  selector:
+    SYS_APP: yundao-cd-deploy-paas-direct
+  type: NodePort

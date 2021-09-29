@@ -1,0 +1,63 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  aria2-pro:
+    image: p3terx/aria2-pro
+    user: "$UID:$GID"
+    container_name: aria2-pro
+    restart: unless-stopped
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","nc -z 127.0.0.1 8080"]
+    environment:
+      PUID: 65534
+      PGID: 65534
+      UMASK_SET: 022
+      RPC_SECRET: P3TERX
+      RPC_PORT: 6800
+      LISTEN_PORT: 6888
+      DISK_CACHE: 64M
+      IPV6_MODE: "false"
+      UPDATE_TRACKERS: "true"
+      CUSTOM_TRACKER_URL: 
+      TZ: Asia/Shanghai
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/aria2/config:/config
+      - ./data/aria2/downloads/:/downloads/
+    ports:
+      - "6800:6800"
+      - "6888:6888"
+      - "6888:6888/udp"
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+  aria-ng:
+    image: p3terx/ariang
+    user: "$UID:$GID"
+    container_name: aria-ng
+    restart: unless-stopped
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","nc -z 127.0.0.1 8080"]
+    command: --port 6880 --ipv6
+    ports:
+      - "6880:6880"
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc

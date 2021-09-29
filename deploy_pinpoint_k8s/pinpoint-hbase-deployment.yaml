@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    SYS_APP: pinpoint-hbase
+  name: pinpoint-hbase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: pinpoint-hbase
+  template:
+    metadata:
+      labels:
+        SYS_APP: pinpoint-hbase
+    spec:
+      containers:
+      - image: pinpointdocker/pinpoint-hbase:2.1.0
+        imagePullPolicy: "Always"
+        name: pinpoint-hbase
+        ports:
+        - containerPort: 2181
+        - containerPort: 60000
+        - containerPort: 16010
+        - containerPort: 60020
+        - containerPort: 16030
+        resources: 
+          limits:
+            cpu: 2
+            memory: 4096Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - mountPath: /home/pinpoint/hbase
+          name: pinpoint-hbase-volume
+          subPath: pinpoint-hbase
+        - mountPath: /home/pinpoint/zookeeper
+          name: pinpoint-hbase-volume
+          subPath: pinpoint-zookeeper
+      restartPolicy: Always
+      volumes:
+      - name: pinpoint-hbase-volume
+        persistentVolumeClaim:
+          claimName: pinpoint-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    SYS_APP: pinpoint-hbase
+  name: pinpoint-hbase
+spec:
+  ports:
+  - name: "2181"
+    port: 2181
+    targetPort: 2181
+  - name: "60000"
+    port: 60000
+    targetPort: 60000
+  - name: "16010"
+    port: 16010
+    targetPort: 16010
+  - name: "60020"
+    port: 60020
+    targetPort: 60020
+  - name: "16030"
+    port: 16030
+    targetPort: 16030
+  selector:
+    SYS_APP: pinpoint-hbase

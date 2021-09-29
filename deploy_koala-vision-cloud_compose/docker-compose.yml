@@ -1,0 +1,34 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  koala-vision-cloud:
+    build:
+      context: build
+      dockerfile: build/Dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-vision-cloud:0.0.1
+    user: "$UID:$GID"
+    container_name: koala-vision-cloud
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
+    ports:
+      - "8080:8080"
+    environment: 
+      NVIDIA_VISIBLE_DEVICES: 0
+      NVIDIA_DRIVER_CAPABILITIES: video,compute,utility
+      EurekaClientEnable: "false"
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/logs/:/usr/local/koala-vision-cloud/logs/
+      - ./data/db/:/usr/local/koala-vision-cloud/db/
+      - ./data/conf/:/usr/local/koala-vision-cloud/conf/
+      - ./data/serial/:/root/koala/osmagic/serial/

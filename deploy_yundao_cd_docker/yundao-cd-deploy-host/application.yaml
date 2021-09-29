@@ -1,0 +1,49 @@
+server:
+  port: 5004
+
+# 关闭eureka
+eureka:
+  instance:
+    prefer-ip-address: true
+    lease-expiration-duration-in-seconds: 30 # 配置客户端多少秒没有心跳就从服务端移除该服务,一般是lease-renewal-interval-in-seconds的3倍
+    lease-renewal-interval-in-seconds: 10 # 客户端定时发送心跳时间间隔
+  client:
+    registry-fetch-interval-seconds: 5 # 拉服务列表时间间隔
+
+kafka:
+  ipPort: 10.128.25.132:9092
+  topic: cddeployhost
+
+ansible:
+  # host文件位置, 存放的主机的地址和密码
+  hosts:
+    url: /data/deploy-files/host/
+    prefix: hosts
+  # 剧本文件位置
+  playbook:
+    cmd: ansible-playbook
+    url: /data/deploy-files/playbook/
+    prefix: playbook
+  adhoc:
+    cmd: ansible
+  # 日志文件位置
+  log:
+    url: /data/deploy-files/logs/
+    prefix: log
+
+# 应用包
+app-package:
+  # 临时目录
+  tempDir: /data/deploy-files/package/
+  # 目标目录
+  targetDir: /data/deploy-files/package/
+
+# 开启健康检查、指标、info信息、接口信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, health, info, mappings
+  endpoint:
+    health:
+      show-details: always

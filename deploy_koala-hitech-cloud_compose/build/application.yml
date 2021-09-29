@@ -1,0 +1,16 @@
+server:
+  port: 8000
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: info
+    com.osmagic: debug
+osmagic:
+  image:
+    # 图片存储地址
+    endpoint: http://10.10.8.5:38095
+  push:
+    call:
+      # 消息推送地址
+      - "https://www.baidu.com"
+      - "http://localhost:8080/hitech/api/v1/receive-demo"

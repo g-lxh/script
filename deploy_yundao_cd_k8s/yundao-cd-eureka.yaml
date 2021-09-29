@@ -1,0 +1,105 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-eureka
+  labels:
+    SYS_APP: yundao-cd-eureka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-eureka
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-eureka
+    spec:
+      volumes:
+      - name: yundao-cd-eureka-cm-v
+        configMap:
+          name: yundao-cd-eureka-cm
+      containers:
+      - name: yundao-cd-eureka
+        image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-eureka-352/cd-eureka:0.1.0-20200509200618
+        ports:
+        - containerPort: 8761
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        resources:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: yundao-cd-eureka-cm-v
+          mountPath: /usr/local/yundao-cd-eureka/conf/application.yaml
+          subPath: application.yaml
+        imagePullPolicy: Always
+      restartPolicy: Always
+      nodeSelector:
+        cluseterLabel: 68c4d928-b4ea-26eb-06bc-62d1c82f1379
+      imagePullSecrets:
+      - name: harbor-registry-secret-10-128-22-191
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-eureka
+  labels:
+    SYS_APP: yundao-cd-eureka
+spec:
+  ports:
+  - name: yundao-cd-eureka
+    protocol: TCP
+    port: 8761
+    targetPort: 8761
+  selector:
+    SYS_APP: yundao-cd-eureka
+  type: NodePort
+
+---
+
+apiVersion: v1
+metadata:
+  name: yundao-cd-eureka-cm
+data:
+  application.yaml: |
+    server:
+      port: 8761
+
+    eureka:
+      instance:
+        hostname: localhost
+        lease-expiration-duration-in-seconds: 30 # 配置客户端多少秒没有心跳就从服务端移除该服务,一般是lease-renewal-interval-in-seconds的3倍
+        lease-renewal-interval-in-seconds: 10 # 客户端定时发送心跳时间间隔
+      client:
+        registry-fetch-interval-seconds: 5 # 拉服务列表时间间隔
+        register-with-eureka: false # 是否将自己注册到Eureka服务中. 单点时候这里是false [默认true]
+        fetch-registry: false # 是否从Eureka 中获取注册信息. 单点时候这里是false [默认true]
+        serviceUrl:
+          defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      server:
+        enable-self-preservation: false # 关闭自我保护模式
+        response-cache-update-interval-ms: 5000 # 刷新注册服务时间间隔
+        eviction-interval-timer-in-ms: 5000 # 清理无效节点时间间隔
+
+    spring:
+      application:
+        name: cd-eurka-server
+
+
+    # 开启健康检查、指标、info信息、接口信息
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: metrics, health, info, mappings
+      endpoint:
+        health:
+          show-details: always
+kind: ConfigMap

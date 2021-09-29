@@ -1,0 +1,27 @@
+version: "3"
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services: 
+  web:
+    image: sonarqube:lts
+    container_name: sonarqube
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 9000" ]
+    ports:
+      - "9000:9000"
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/sonarqube/conf/:/opt/sonarqube/conf/
+      - ./data/sonarqube/data/:/opt/sonarqube/data/
+      - ./data/sonarqube/logs/:/opt/sonarqube/logs/
+      - ./data/sonarqube/extensions/:/opt/sonarqube/extensions/
+      - ./data/sonarqube/lib/bundled-plugins/:/opt/sonarqube/extensions/lib/bundled-plugins/

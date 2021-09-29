@@ -1,0 +1,99 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-nginx-plus
+  labels:
+    SYS_APP: yundao-cd-nginx-plus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-nginx-plus
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-nginx-plus
+    spec:
+      volumes:
+      - name: yundao-cd-nginx-plus-pvc-v
+        persistentVolumeClaim:
+          claimName: yundao-cd-nginx-plus-pvc
+      containers:
+      - name: yundao-cd-nginx-plus
+        image: harbor.sh-chinatelecom.yundao.com.cn:8443/library/nginx:1.18.0-plus-lua
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: yundao-cd-nginx-plus-pvc-v
+          mountPath: /nginx-plus/db
+          subPath: db
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9512
+            scheme: HTTP
+          initialDelaySeconds: 20
+          timeoutSeconds: 1
+          periodSeconds: 10
+        imagePullPolicy: Always
+      restartPolicy: Always
+      nodeSelector:
+        cluseterLabel: 68c4d928-b4ea-26eb-06bc-62d1c82f1379
+      imagePullSecrets:
+      - name: harbor-registry-secret-10-128-22-191
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yundao-cd-nginx-plus
+  labels:
+    SYS_APP: yundao-cd-nginx-plus
+spec:
+  ports:
+  - name: yundao-cd-nginx-plus
+    protocol: TCP
+    port: 9512
+    targetPort: 9512
+  - name: yundao-cd-nginx-80
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  - name: yundao-cd-nginx-8080
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  - name: yundao-cd-nginx-8081
+    protocol: TCP
+    port: 8081
+    targetPort: 8081
+  - name: yundao-cd-nginx-8082
+    protocol: TCP
+    port: 8082
+    targetPort: 8082
+  selector:
+    SYS_APP: yundao-cd-nginx-plus
+  type: NodePort
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: yundao-cd-nginx-plus-pvc
+  labels:
+    SYS_APP: yundao-cd-nginx-plus-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: test-nfs-storage

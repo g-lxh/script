@@ -1,0 +1,88 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: yundao-cd-config
+  namespace: yundao-prod
+  labels:
+    SYS_APP: yundao-cd-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      SYS_APP: yundao-cd-config
+  template:
+    metadata:
+      labels:
+        SYS_APP: yundao-cd-config
+    spec:
+      containers:
+      - name: yundao-cd-config
+        image: 10.238.9.17:8443/yundao-cd-config-353/cd-config:0.10.0
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "-server -Xmx2688M -Xms2688M -Xmn960M"
+        - name: ctgydpaas_app_name
+          value: cdconfig
+        - name: ctgydpaas_app_basepkg
+          value: com.yundao.cd.config
+        - name: ctgydpaas_app_nameserver
+          value: http://10.238.9.205:18080/eureka,http://10.238.9.216:18080/eureka,http://10.238.9.232:18080/eureka
+        - name: ctgydpaas_apollo_meta
+          value: http://10.238.9.11:31028
+        - name: ctgydpaas_apollo_namespaces
+          value: application.yml
+        - name: ctgydpaas_apollo_appid
+          value: yundao-cd-config
+        - name: ctgydpaas_apollo_cluster
+          value: PROD
+        resources:
+          limits:
+            cpu: '2'
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+        imagePullPolicy: Always
+      restartPolicy: Always
+      nodeSelector:
+        cluseterLabel: 726f7f7c-496f-4eed-95c0-6039479629ed
+      imagePullSecrets:
+        - name: harbor-secret-10-238-9-17
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yundao-cd-config
+  labels:
+    SYS_APP: yundao-cd-config
+spec:
+  ports:
+  - name: yundao-cd-config
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30312
+  selector:
+    SYS_APP: yundao-cd-config
+  type: NodePort

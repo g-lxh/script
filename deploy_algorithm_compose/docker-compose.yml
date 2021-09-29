@@ -1,0 +1,35 @@
+# cxx-full是全量镜像服务，需要单独启动某一个算法，需要删除其他模型
+## 车牌识别： ls | grep -v -E "PersonCar|LicensePlateDetect|LicensePlateRecognize|LicensePlateKeyPoint" | xargs rm -rf
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  cxx-full:
+    image: hub.kaolayouran.cn:5000/osmagic-all/micro-algo-dynamic/city-manger:20210918124906-145
+    container_name: cxx-full
+    restart: always
+    healthcheck: 
+      <<: *default-healthcheck
+      test: ["CMD-SHELL","nc -z 127.0.0.1 10000"]
+    environment:
+      NVIDIA_VISIBLE_DEVICES: "0"
+      NVIDIA_DRIVER_CAPABILITIES: "video,compute,utility"
+      EurekaClientEnable: "true"
+      EurekaInstanceName: osmagic-algo-dynamic
+      EurekaInstanceIp: 10.10.8.218
+      EurekaInstancePort: "10000"
+      EurekaClientServiceUrlDefaultZone: "10.10.8.5:46101"
+      EurekaInstanceHeartRate: "30"
+    ports:
+      - "10000:10000"
+    volumes:
+      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
+      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
+      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
+      - /usr/bin/nc:/usr/bin/nc
+      - ./data/cxx-full/serial/:/root/koala/osmagic/serial/
+      - ./data/cxx-full/configs/:/root/koala/osmagic/configs/
