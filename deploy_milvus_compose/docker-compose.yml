@@ -6,7 +6,6 @@ x-default-healthcheck: &default-healthcheck
   start_period: 10s
 
 x-default-milvus: &default-milvus
-  user: "${UID:-1000}:${GID:-1000}"
   image: milvusdb/milvus:1.1.0-cpu-d050721-5e559c
   restart: always
   expose:

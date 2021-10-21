@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   mongo:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: mongo
     image: mongo:latest
     restart: always
@@ -19,14 +18,13 @@ services:
     build:
       context: build
       dockerfile: Dockerfile
-    depends_on:
-      - mongo
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: yapi
     image: registry.cn-hangzhou.aliyuncs.com/linxh/yapi:latest
     restart: always
     ports:
       - "9090:9090"
+    depends_on:
+      - mongo
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 9090" ]

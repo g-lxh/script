@@ -5,13 +5,8 @@ services:
     container_name: harbor-log
     restart: always
     dns_search: .
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - SETGID
-      - SETUID
+    ports:
+      - 127.0.0.1:1514:10514
     volumes:
       - /Users/linxh/ops/deploy_harbor_componse/data/log/:/var/log/docker/:z
       - type: bind
@@ -20,20 +15,20 @@ services:
       - type: bind
         source: ./common/config/log/rsyslog_docker.conf
         target: /etc/rsyslog.d/rsyslog_docker.conf
-    ports:
-      - 127.0.0.1:1514:10514
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
     networks:
       - harbor
   registry:
     image: goharbor/registry-photon:v2.1.3
     container_name: registry
     restart: always
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
+    dns_search: .
     volumes:
       - /Users/linxh/ops/deploy_harbor_componse/data/registry:/storage:z
       - ./common/config/registry/:/etc/registry/:z
@@ -43,10 +38,15 @@ services:
       - type: bind
         source: ./common/config/shared/trust-certificates
         target: /harbor_cust_cert
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
     networks:
       - harbor
       - harbor-clair
-    dns_search: .
     depends_on:
       - log
     logging:
@@ -57,15 +57,9 @@ services:
   registryctl:
     image: goharbor/harbor-registryctl:v2.1.3
     container_name: registryctl
+    restart: always
     env_file:
       - ./common/config/registryctl/env
-    restart: always
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
     volumes:
       - /Users/linxh/ops/deploy_harbor_componse/data/registry:/storage:z
       - ./common/config/registry/:/etc/registry/:z
@@ -75,6 +69,12 @@ services:
       - type: bind
         source: ./common/config/shared/trust-certificates
         target: /harbor_cust_cert
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
     networks:
       - harbor
     dns_search: .

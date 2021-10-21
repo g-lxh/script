@@ -7,14 +7,9 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   easyconnect:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: easyconnect
     image: hagb/docker-easyconnect:cli
     restart: always
-    devices:
-      - /dev/net/tun
-    cap_add:
-      - NET_ADMIN
     ports:
       - "1080:1080"
     environment:
@@ -22,6 +17,10 @@ services:
       CLI_OPTS: "-d vpn地址 -u vpn用户名 -p vpn密码"
     volumes:
       - ./data/easyconnect/:/root/
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 1080" ]

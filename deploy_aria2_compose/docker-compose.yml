@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   aria2-pro:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: aria2-pro
     image: p3terx/aria2-pro
     restart: unless-stopped
@@ -39,7 +38,6 @@ services:
       test: [ "CMD-SHELL","nc -z 127.0.0.1 6888" ]
 
   aria-ng:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: aria-ng
     image: p3terx/ariang
     restart: unless-stopped

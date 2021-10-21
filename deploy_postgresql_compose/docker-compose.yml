@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   postgresql:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: postgresql
     image: postgres:latest
     restart: always

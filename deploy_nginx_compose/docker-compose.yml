@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   nginx:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: nginx
     image: nginx:latest
     restart: always

@@ -8,7 +8,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   gitlab-ce:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: gitlab-ce
     image: gitlab/gitlab-ce:11.8.0-ce.0
     restart: always
@@ -42,7 +41,6 @@ services:
       test: [ "CMD-SHELL","curl -s 127.0.0.1:80 > /dev/null 2>&1" ]
 
   postgresql:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: postgresql
     image: postgres:latest
     restart: always
@@ -55,7 +53,6 @@ services:
 
   redis:
     container_name: redis
-    user: "${UID:-1000}:${GID:-1000}"
     image: redis:latest
     restart: always
     command: redis-server /etc/redis/redis.conf

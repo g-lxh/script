@@ -10,7 +10,6 @@ services:
     build:
       context: build
       dockerfile: Dockerfile_license-server
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: license-server
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-server:1.0
     restart: always
@@ -28,7 +27,6 @@ services:
     build:
       context: build
       dockerfile: Dockerfile_license-web
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: license-server-web
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-server-web:1.0
     restart: always

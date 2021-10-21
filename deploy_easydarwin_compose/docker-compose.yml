@@ -10,7 +10,6 @@ services:
     build:
       context: build
       dockerfile: Dockerfile
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: easydarwin
     image: registry.cn-hangzhou.aliyuncs.com/linxh/easydarwin:latest
     restart: always

@@ -10,7 +10,6 @@ services:
     build:
       context: build
       dockerfile: Dockerfile
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: license-client
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-client:1.0
     restart: always

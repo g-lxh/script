@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   go-fastdfs:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: go-fastdfs
     image: sjqzhang/go-fastdfs
     restart: always

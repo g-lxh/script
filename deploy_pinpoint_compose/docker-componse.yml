@@ -2,7 +2,6 @@
 #
 #services:
 #  pinpoint-hbase:
-#    user: "${UID:-1000}:${GID:-1000}"
 #    container_name: pinpoint-hbase
 #    image: pinpointdocker/pinpoint-hbase:2.1.0
 #    expose:

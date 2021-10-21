@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   ql:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: ql
     image: whyour/qinglong:latest
     hostname: ql
@@ -26,7 +25,6 @@ services:
       test: [ "CMD-SHELL","nc -z 127.0.0.1 5700" ]
 
   nginx:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: nginx
     image: nginx:latest
     restart: always

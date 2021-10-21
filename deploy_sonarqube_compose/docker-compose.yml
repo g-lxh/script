@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services: 
   web:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: sonarqube
     image: sonarqube:lts
     restart: always

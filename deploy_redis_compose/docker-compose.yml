@@ -7,15 +7,14 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   redis:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: redis
     image: redis:latest
     restart: always
     command: redis-server /etc/redis/redis.conf
     ports:
       - "6379:6379"
-    sysctls:
-      net.core.somaxconn: 1024
     volumes:
       - ./data/redis/data/:/data/
       - ./data/redis/conf/redis.conf:/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024

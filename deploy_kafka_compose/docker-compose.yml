@@ -7,7 +7,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   zookeeper:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: zookeeper
     image: wurstmeister/zookeeper
     ports:
@@ -17,7 +16,6 @@ services:
       test: [ "CMD-SHELL","nc -z 127.0.0.1 2181" ]
 
   kafka:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: kafka
     image: wurstmeister/kafka
     ports:

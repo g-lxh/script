@@ -9,7 +9,6 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   cxx-full:
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: cxx-full
     image: hub.kaolayouran.cn:5000/osmagic-all/micro-algo-dynamic/city-manger:20210918124906-145
     restart: always

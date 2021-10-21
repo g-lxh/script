@@ -10,7 +10,6 @@ services:
     build:
       context: build
       dockerfile: build/Dockerfile
-    user: "${UID:-1000}:${GID:-1000}"
     container_name: koala-vision-cloud
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-vision-cloud:0.0.1
     restart: always
