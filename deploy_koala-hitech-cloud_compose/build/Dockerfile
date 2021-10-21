@@ -12,5 +12,6 @@ RUN set -eux; \
 # 应用程序
 ENV app_dir=/usr/local/koala-hitech-cloud
 ADD koala-hitech-cloud-*-pkg.tar.gz ${app_dir}
-EXPOSE 8080
+ADD application.yml ${app_dir}/conf/
+EXPOSE 8000
 CMD ${app_dir}/bin/run.sh

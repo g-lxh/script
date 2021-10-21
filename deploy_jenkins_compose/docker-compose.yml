@@ -7,25 +7,21 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   jenkins:
-    image: jenkins/jenkins:2.246
-    user: "$UID:$GID"
+    user: "${UID:-1000}:${GID:-1000}"
     container_name: jenkins
+    image: jenkins/jenkins:2.246
     restart: always
-    environment: 
-      JENKINS_WAR: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/jenkins.war
-      REF: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/ref
-    entrypoint: 
+    entrypoint:
       - /bin/sh
       - -c
       - cp -r -f /usr/share/jenkins/ ${JENKINS_HOME:-/var/jenkins_home/}jenkins/ && tini -- /usr/local/bin/jenkins.sh
-    healthcheck:
-      <<: *default-healthcheck
-      test: ["CMD-SHELL","nc -z 127.0.0.1 8080"]
     ports:
       - "8080:8080"
+    environment:
+      JENKINS_WAR: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/jenkins.war
+      REF: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/ref
     volumes:
-      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
-      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
-      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
-      - /usr/bin/nc:/usr/bin/nc
-      - ./data/:/var/jenkins_home/
+      - ./data/jenkins/:/var/jenkins_home/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s 127.0.0.1:8080 > /dev/null 2>&1" ]

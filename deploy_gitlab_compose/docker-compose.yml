@@ -1,0 +1,68 @@
+version: "3"
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+
+services:
+  gitlab-ce:
+    user: "${UID:-1000}:${GID:-1000}"
+    container_name: gitlab-ce
+    image: gitlab/gitlab-ce:11.8.0-ce.0
+    restart: always
+    hostname: 127.0.0.1
+    ports:
+      - '80:80'
+      - '443:443'
+      - '22:22'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.example.com'
+        postgresql['enable'] = false
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'utf8'
+        gitlab_rails['db_host'] = 'postgresql'
+        gitlab_rails['db_port'] = '5432'
+        gitlab_rails['db_username'] = 'postgres'
+        gitlab_rails['db_password'] = 'Ideal@015'
+        gitlab_rails['db_database'] = "gitlab"
+        redis['enable'] = false
+        gitlab_rails['redis_host'] = 'redis'
+        gitlab_rails['redis_port'] = 6379
+        gitlab_rails['redis_password'] = 'Ideal@015'
+        gitlab_rails['redis_database'] = 1
+    volumes:
+      - ./data/gitlab-ce/config/:/etc/gitlab/
+      - ./data/gitlab-ce/logs/:/var/log/gitlab/
+      - ./data/gitlab-ce/data/:/var/opt/gitlab/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s 127.0.0.1:80 > /dev/null 2>&1" ]
+
+  postgresql:
+    user: "${UID:-1000}:${GID:-1000}"
+    container_name: postgresql
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: Ideal@015
+    volumes:
+      - ./data/postgresql/data/:/var/lib/postgresql/data/
+
+  redis:
+    container_name: redis
+    user: "${UID:-1000}:${GID:-1000}"
+    image: redis:latest
+    restart: always
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis/data/:/data/
+      - ./data/redis/conf/redis.conf:/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024

@@ -3,4 +3,4 @@ FROM $base_image
 LABEL maintainer="v.linxh@gmail.com"
 
 # 应用程序
-ADD license-server-web.zip /usr/share/nginx/html/
+ADD license-server-web.tar.gz /usr/share/nginx/html/

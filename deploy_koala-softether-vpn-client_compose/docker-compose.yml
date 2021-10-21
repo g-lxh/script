@@ -1,0 +1,42 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  softether-vpn-client:
+    user: "${UID:-1000}:${GID:-1000}"
+    container_name: softether-vpn-client
+    image: containinger/docker-softether-vpn-client:latest
+    privileged: true
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SE_SERVER: vpn.example.net:443
+      SE_HUB: TheHub
+      SE_USERNAME: vpnuser
+      SE_PASSWORD: Sup3rS3cr3t
+    cap_add:
+      - NET_ADMIN
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
+
+  guacamole-app:
+    user: "${UID:-1000}:${GID:-1000}"
+    container_name: guacamole-app
+    image: oznu/guacamole
+    restart: always
+    volumes:
+      - ./data/guacamole-app/config/:/config/
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - softether-vpn-client
+    network_mode: "service:softether-vpn-client"
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s http://127.0.0.1:8080 > /dev/null 2>&1" ]

@@ -9,21 +9,16 @@ services:
   koala-hitech-cloud:
     build:
       context: build
-      dockerfile: build/Dockerfile
-    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-cloud:0.0.1
-    user: "$UID:$GID"
+      dockerfile: Dockerfile
+    user: "${UID:-1000}:${GID:-1000}"
     container_name: koala-hitech-cloud
+    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-cloud:0.0.1
     restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/koala-hitech-cloud/logs/:/usr/local/koala-hitech-cloud/logs/
+      - ./data/koala-hitech-cloud/conf/:/usr/local/koala-hitech-cloud/conf/
     healthcheck:
       <<: *default-healthcheck
-      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
-    ports:
-      - "8080:8080"
-    volumes:
-      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
-      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
-      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
-      - /usr/bin/nc:/usr/bin/nc
-      - ./data/logs/:/usr/local/koala-hitech-cloud/logs/
-      - ./data/db/:/usr/local/koala-hitech-cloud/db/
-      - ./data/conf/:/usr/local/koala-hitech-cloud/conf/
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8000" ]

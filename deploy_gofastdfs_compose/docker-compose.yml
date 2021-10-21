@@ -6,20 +6,17 @@ x-default-healthcheck: &default-healthcheck
   start_period: 10s
 
 services:
-  fastdfs:
-    image: sjqzhang/go-fastdfs
+  go-fastdfs:
+    user: "${UID:-1000}:${GID:-1000}"
     container_name: go-fastdfs
+    image: sjqzhang/go-fastdfs
     restart: always
-    healthcheck: 
-      <<: *default-healthcheck
-      test: ["CMD-SHELL","nc -z 127.0.0.1 8080"]
-    environment:
-      GO_FASTDFS_DIR: /data
     ports:
       - "8080:8080"
+    environment:
+      GO_FASTDFS_DIR: /data
     volumes:
-      - /usr/lib64/libssl.so.10:/usr/lib64/libssl.so.10
-      - /usr/lib64/libcrypto.so.10:/usr/lib64/libcrypto.so.10
-      - /usr/lib64/libpcap.so.1:/usr/lib64/libpcap.so.1
-      - /usr/bin/nc:/usr/bin/nc
-      - ./data/:/data/
+      - ./data/go-fastdfs/:/data/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]

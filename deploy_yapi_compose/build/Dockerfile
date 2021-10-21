@@ -1,55 +1,40 @@
-FROM node:12.16.3-alpine3.11 as builder
+ARG base_image=node:12-alpine
+FROM $base_image
+LABEL maintainer="v.linxh@gmail.com"
+# 时区
+ENV TZ=Asia/Shanghai
+RUN set -eux && apk add --no-cache --update tzdata && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # 安装构建工具
-RUN apk add --update --no-cache ca-certificates curl wget cmake build-base git bash python make gcc g++ zlib-dev autoconf automake file nasm \
-  && update-ca-certificates
+RUN apk add --update --no-cache ca-certificates curl wget cmake build-base git bash python make gcc g++ zlib-dev autoconf automake file nasm
 
-# YApi 版本
-ENV YAPI_VERSION=1.9.2
+# 指定工作目录
+RUN git clone --depth=1 https://github.com/YMFE/yapi.git vendors && \
+    cp vendors/config_example.json ./config.json && \
+    sed -i "s/127.0.0.1/mongo/g" ./config.json && \
+    cd vendors && \
+    npm install --production --registry https://registry.npm.taobao.org && \
+    npm run install-server
 
-# 编译脚本
-WORKDIR /yapi/scripts
-COPY . .
-RUN yarn && yarn build
+CMD ["node", "server/app.js"]
 
-WORKDIR /yapi/vendors
-
-# 拉取 YApi 源码
-RUN git clone \
-  --branch "v${YAPI_VERSION}" \
-  --single-branch \
-  --depth 1 \
-  https://github.com/YMFE/yapi.git .
-
-# 拷贝启动脚本
-RUN cp /yapi/scripts/start.js ./start.js
-
-# 执行一些准备工作
-RUN node /yapi/scripts/prepare.js $(pwd)
-
-# 安装依赖
-RUN yarn
-
-# 清理文件
-RUN node /yapi/scripts/clean.js $(pwd)
-
-# 构建应用
-RUN yarn build-client
-
-# 再次清理以删除构建缓存文件
-RUN node /yapi/scripts/clean.js $(pwd)
-
-# 删除脚本
-RUN rm -rf /yapi/scripts
-
-
-######## 镜像 ########
-FROM node:12.16.3-alpine3.11
-
-WORKDIR /yapi
-
-COPY --from=builder /yapi .
-
-EXPOSE 3000
-
-CMD ["node", "/yapi/vendors/start.js"]
+## 时区
+#ENV TZ=Asia/Shanghai
+#RUN set -eux; \
+#    apk add --no-cache --update tzdata; \
+#    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime; \
+#    echo $TZ > /etc/timezone
+#
+## 安装构建工具
+#RUN apk add --update --no-cache ca-certificates curl wget cmake build-base git bash python make gcc g++ zlib-dev autoconf automake file nasm && update-ca-certificates
+#
+## 指定工作目录
+#RUN git clone --depth=1 https://github.com/YMFE/yapi.git vendors; \
+#    cp vendors/config_example.json ./config.json; \
+#    cd vendors; \
+#    npm install --production --registry https://registry.npm.taobao.org; \
+#    npm run install-server
+#
+#CMD ["node", "server/app.js"]
+#
+#export https_proxy=http://10.10.5.55:7890 http_proxy=http://10.10.5.55:7890 all_proxy=socks5://10.10.5.55:7890

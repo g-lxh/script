@@ -1,16 +1,51 @@
 server:
   port: 8000
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss.sss
+  datasource:
+    hikari.pool-name: "North"
+    hikari.minimum-idle: 5
+    hikari.maximum-pool-size: 15
+    password: root
+    username: root
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:${user.home}/h2/koala-hitech-cloud;MODE=MYSQL
+    schema: classpath:./db/schema.sql
+  h2:
+    console:
+      enabled: true
+
 logging:
   config: classpath:logback-spring.xml
   level:
     root: info
     com.osmagic: debug
+
 osmagic:
+  project:
+    callback: http://10.10.5.55:808/hitech/api/v1/receives/call # 回调地址，本服务的可被访问的地址
+  huawei:
+    endpoint: https://192.168.155.194:18531 # 华为接口地址，用于获取流地址
+    username: vcm-api01
+    password: HWapi@123
+  platform:
+    endpoint: http://10.10.8.5:46200 # 码极客地址
   image:
-    # 图片存储地址
-    endpoint: http://10.10.8.5:38095
+    endpoint: http://10.10.8.5:38095 # 文件服务地址
+  big-data:
+    endpoint: http://192.168.155.133:86 # 大数据接口地址
+    token: "q0NyUq7kyeTsQH_vMS6H-6o-_szgi2qTcBPhOHkuDyI"
   push:
+    monitoring-type:
+      1: VehicleLicenseRecon # 车辆识别
+      3: 3 # 车辆偏移
+      4: 4 # 车辆碰撞
+      5: 5 # 车辆布控
+      6: FireOrSmokeDetected # 明火烟雾
+      7: MotorVehicleParking # 主干道违停
+      8: 8 # 道路拥堵
+      9: UnexpectedEvents # 人员聚集
     call:
-      # 消息推送地址
       - "https://www.baidu.com"
-      - "http://localhost:8080/hitech/api/v1/receive-demo"
+      - "http://127.0.0.1:808/hitech/api/v1/receives/debug"
