@@ -1,0 +1,209 @@
+server:
+  port: 9001
+
+eureka:
+  # 禁用注册中心，作为前置机时使用
+  client:
+    register-with-eureka: false
+    fetchRegistry: false
+    server:
+      waitTimeInMsWhenSyncEmpty: 0
+
+k8s:
+  serviceName:
+    # 前端代理的 cd-deploy 服务地址，如果没有请直接使用 cd-deploy 服务的访问地址
+    deploy: 10.128.22.189:30093/cddeploy
+  deploy:
+    deployType: kubernetes
+    colonyId: 1
+    view: http://{serviceName}/api/cd/v1/resources/colonyInfo
+
+dashboard:
+  deployment:
+    view: /api/v1/deployment/{namespace}/{deployment}
+  pod:
+    view: /api/v1/pod/{namespace}/{pod}
+
+#接口path 配置
+kubes:
+  versions:
+    - val: '1.7'
+      configMapUrl:
+        list: "/api/v1/namespaces/{namespace}/configmaps"
+      volumeUrl:
+        list: "/api/v1/namespaces/{namespace}/persistentvolumeclaims"
+      replicasetUrl:
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets"
+      deploymentUrl:
+        create: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        delete: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        update: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        patch: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        list: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        listAll: "/apis/apps/v1beta1/deployments"
+        view: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+      autoscaleUrl:
+        create: "/apis/autoscaling/v2alpha1/namespaces/{namespace}/horizontalpodautoscalers"
+        delete: "/apis/autoscaling/v2alpha1/namespaces/{namespace}/horizontalpodautoscalers/{name}"
+        list: "/apis/autoscaling/v2alpha1/namespaces/{namespace}/horizontalpodautoscalers"
+        listAll: "/apis/autoscaling/v2alpha1/horizontalpodautoscalers"
+        view: "/apis/autoscaling/v2alpha1/namespaces/{namespace}/horizontalpodautoscalers/{name}"
+      ingressUrl:
+        create: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        view: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        listAll: "/apis/extensions/v1beta1/ingresses"
+        update: " /apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+      serviceUrl:
+        create: "/api/v1/namespaces/{namespace}/services"
+        delete: "/api/v1/namespaces/{namespace}/services/{name}"
+        view: "/api/v1/namespaces/{namespace}/services/{name}"
+        list: "/api/v1/namespaces/{namespace}/services"
+        listAll: "/api/v1/services"
+        update: "/api/v1/namespaces/{namespace}/services/{name}"
+      podUrl:
+        view: "/api/v1/namespaces/{namespace}/pods/{name}"
+        list: "/api/v1/namespaces/{namespace}/pods"
+        delete: "/api/v1/namespaces/{namespace}/pods/{name}"
+        listAll: "/api/v1/pods"
+      logUrl:
+        log: "/api/v1/namespaces/{namespace}/pods/{name}/log"
+      eventUrl:
+        list: "/api/v1/namespaces/{namespace}/events"
+        listAll: "/api/v1/events"
+
+    - val: '1.9'
+      configMapUrl:
+        list: "/api/v1/namespaces/{namespace}/configmaps"
+      volumeUrl:
+        list: "/api/v1/namespaces/{namespace}/persistentvolumeclaims"
+      replicasetUrl:
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets"
+      deploymentUrl:
+        create: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        delete: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        update: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        patch: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        list: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        listAll: "/apis/apps/v1beta1/deployments"
+        view: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+      ingressUrl:
+        create: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        view: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        listAll: "/apis/extensions/v1beta1/ingresses"
+        update: " /apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+      serviceUrl:
+        create: "/api/v1/namespaces/{namespace}/services"
+        delete: "/api/v1/namespaces/{namespace}/services/{name}"
+        view: "/api/v1/namespaces/{namespace}/services/{name}"
+        list: "/api/v1/namespaces/{namespace}/services"
+        listAll: "/api/v1/services"
+        update: "/api/v1/namespaces/{namespace}/services/{name}"
+      podUrl:
+        view: "/api/v1/namespaces/{namespace}/pods/{name}"
+        list: "/api/v1/namespaces/{namespace}/pods"
+        delete: "/api/v1/namespaces/{namespace}/pods/{name}"
+        listAll: "/api/v1/pods"
+      logUrl:
+        log: "/api/v1/namespaces/{namespace}/pods/{name}/log"
+      eventUrl:
+        list: "/api/v1/namespaces/{namespace}/events"
+        listAll: "/api/v1/events"
+
+
+    - val: '1.14'
+      configMapUrl:
+        list: "/api/v1/namespaces/{namespace}/configmaps"
+      volumeUrl:
+        list: "/api/v1/namespaces/{namespace}/persistentvolumeclaims"
+      replicasetUrl:
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets"
+      deploymentUrl:
+        create: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        delete: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        update: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        patch: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        list: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        listAll: "/apis/apps/v1beta1/deployments"
+        view: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+      ingressUrl:
+        create: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        view: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        listAll: "/apis/extensions/v1beta1/ingresses"
+        update: " /apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+      serviceUrl:
+        create: "/api/v1/namespaces/{namespace}/services"
+        delete: "/api/v1/namespaces/{namespace}/services/{name}"
+        view: "/api/v1/namespaces/{namespace}/services/{name}"
+        list: "/api/v1/namespaces/{namespace}/services"
+        listAll: "/api/v1/services"
+        update: "/api/v1/namespaces/{namespace}/services/{name}"
+      podUrl:
+        view: "/api/v1/namespaces/{namespace}/pods/{name}"
+        list: "/api/v1/namespaces/{namespace}/pods"
+        delete: "/api/v1/namespaces/{namespace}/pods/{name}"
+        listAll: "/api/v1/pods"
+      logUrl:
+        log: "/api/v1/namespaces/{namespace}/pods/{name}/log"
+      eventUrl:
+        list: "/api/v1/namespaces/{namespace}/events"
+        listAll: "/api/v1/events"
+
+    - val: '1.10'
+      configMapUrl:
+        list: "/api/v1/namespaces/{namespace}/configmaps"
+      volumeUrl:
+        list: "/api/v1/namespaces/{namespace}/persistentvolumeclaims"
+      replicasetUrl:
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/replicasets"
+      deploymentUrl:
+        create: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        delete: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        update: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        patch: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+        list: "/apis/apps/v1beta1/namespaces/{namespace}/deployments"
+        listAll: "/apis/apps/v1beta1/deployments"
+        view: "/apis/apps/v1beta1/namespaces/{namespace}/deployments/{name}"
+      ingressUrl:
+        create: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        delete: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        view: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+        list: "/apis/extensions/v1beta1/namespaces/{namespace}/ingresses"
+        listAll: "/apis/extensions/v1beta1/ingresses"
+        update: " /apis/extensions/v1beta1/namespaces/{namespace}/ingresses/{name}"
+      serviceUrl:
+        create: "/api/v1/namespaces/{namespace}/services"
+        delete: "/api/v1/namespaces/{namespace}/services/{name}"
+        view: "/api/v1/namespaces/{namespace}/services/{name}"
+        list: "/api/v1/namespaces/{namespace}/services"
+        listAll: "/api/v1/services"
+        update: "/api/v1/namespaces/{namespace}/services/{name}"
+      podUrl:
+        view: "/api/v1/namespaces/{namespace}/pods/{name}"
+        list: "/api/v1/namespaces/{namespace}/pods"
+        delete: "/api/v1/namespaces/{namespace}/pods/{name}"
+        listAll: "/api/v1/pods"
+      logUrl:
+        log: "/api/v1/namespaces/{namespace}/pods/{name}/log"
+      eventUrl:
+        list: "/api/v1/namespaces/{namespace}/events"
+        listAll: "/api/v1/events"
+
+# 开启健康检查、指标、info信息、接口信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, health, info, mappings
+  endpoint:
+    health:
+      show-details: always

@@ -1,0 +1,147 @@
+server:
+  port: 8180
+
+eureka:
+  # 禁用注册中心，作为前置机时使用
+  client:
+    register-with-eureka: false
+    fetchRegistry: false
+    server:
+      waitTimeInMsWhenSyncEmpty: 0
+
+# paas相关配置
+paas:
+  # paas接口 ip
+  ip: 10.128.86.64
+  # paas接口 端口
+  port: 8000
+  # paas网关key
+  appKey: eBsBVOk68Ld
+  # paas网关secret
+  appSecret: 52mr1K9z1C
+  # dcoos appId
+  dcoosXAppId: 717ac0ff9e92a3138b87ad3d975cb390
+  # dcoos appSecret
+  dcoosXAppKey: d3411108bfe510a01d62ded214f9de13
+  # 连接超时
+  connectionTimeoutMillis: 60000
+  # 读写超时
+  readTimeoutMillis: 60000
+  writeTimeoutMillis: 60000
+  # 资源池标识
+  regionId: default2
+  apis:
+    # 应用
+    applicationApi:
+      # 列表
+      list: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/apps
+      # 创建
+      create: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/apps
+      # 修改
+      modify:
+      # 删除
+      delete: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/apps/[appName]
+    # 删除应用及其下所有资源
+    deleteAll: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/apps/[appName]/all
+    # deployment
+    deploymentApi:
+      # 分页查询
+      page: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/page
+      # 查询
+      view: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]
+      # 删除
+      delete: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]
+      # 创建
+      create: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments
+      # 修改
+      modify: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]
+      # 启动
+      start: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]/start
+      # 停止
+      stop: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]/terminate
+      # 重启
+      restart: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]/restart
+      # yaml
+      yaml: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]/yaml
+      #运行状态
+      pods: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]/pods
+      #事件
+      events: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]/events
+      # 水平伸缩
+      expant: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/deployments/[deploymentName]
+    # service
+    serviceApi:
+      # 是否存在
+      exists: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services/[serviceName]/exists
+      # 删除
+      delete: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services/[serviceName]
+      # 创建
+      create: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services
+      # 修改
+      modify: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services/[serviceName]
+      # 分页列表
+      page: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services/page
+      # 详情
+      view: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services/[serviceName]
+      # 列表
+      list: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/services/list
+    # pod
+    podApi:
+      # 列表
+      list: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods
+      # 删除
+      delete: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods/[podName]/restart
+      # 日志
+      log: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods/[podName]/logs/page
+      # pod yaml
+      yaml: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods/[podName]/yaml
+      #事件
+      events: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods/[podName]/events
+      #内存使用率
+      memoryUsage: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods/[podName]/memoryUsage
+      #内存使用率
+      cpuUsage: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/pods/[podName]/cpuUsage
+      shell: /serviceAgent/rest/ccseapi/clusters/[clusterName]/ssh/connections
+    # ingress
+    ingressApi:
+      # 是否存在
+      exists: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses/[ingressName]/exists
+      # 删除
+      delete: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses/[ingressName]
+      # 创建
+      create: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses
+      # 修改
+      modify: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses/[ingressName]
+      # 分页查询Ingress
+      page: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses/page
+      # Ingress 详情
+      view: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses/[ingressName]
+      # 列表
+      list: /serviceAgent/rest/ccseapi/clusters/[clusterName]/namespaces/[namespaceName]/ingresses/list
+    # hpa
+    hpaApi:
+      # 创建
+      create:
+      # 修改
+      modify:
+
+    # 租户api
+    tenantApi:
+      # 根据用户id或用户名查询用户所属的租户列表
+      list: /serviceAgent/rest/paasapi/openapi/v1/users/tenants
+      # 根据租户名查询租户信息
+      view:
+    # 用户api
+    userApi:
+      # 根据用户名查询用户信息
+      view:
+
+# 开启健康检查、指标、info信息、接口信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, health, info, mappings
+  endpoint:
+    health:
+      show-details: always

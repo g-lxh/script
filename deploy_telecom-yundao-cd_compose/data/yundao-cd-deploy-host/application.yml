@@ -1,0 +1,48 @@
+server:
+  port: 5004
+
+  eureka:
+    # 禁用注册中心，作为前置机时使用
+    client:
+      register-with-eureka: false
+      fetchRegistry: false
+      server:
+        waitTimeInMsWhenSyncEmpty: 0
+
+kafka:
+  ipPort: 10.128.25.132:9092
+  topic: cddeployhost
+
+ansible:
+  # host文件位置, 存放的主机的地址和密码
+  hosts:
+    url: /data/deploy-files/host/
+    prefix: hosts
+  # 剧本文件位置
+  playbook:
+    cmd: ansible-playbook
+    url: /data/deploy-files/playbook/
+    prefix: playbook
+  adhoc:
+    cmd: ansible
+  # 日志文件位置
+  log:
+    url: /data/deploy-files/logs/
+    prefix: log
+
+# 应用包
+app-package:
+  # 临时目录
+  tempDir: /data/deploy-files/package/
+  # 目标目录
+  targetDir: /data/deploy-files/package/
+
+# 开启健康检查、指标、info信息、接口信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics, health, info, mappings
+  endpoint:
+    health:
+      show-details: always

@@ -1,0 +1,79 @@
+version: "3"
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  yundao-cd-deploy-k8s:
+    container_name: yundao-cd-deploy-k8s
+    image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-deploy-kubernetes-356/cd-deploy-k8s:0.9.2
+    restart: always
+    ports:
+      - "31998:9001"
+    environment:
+      JAVA_OPTS: -server -Xmx2688M -Xms2688M -Xmn960M
+      ctgydpaas_app_name: cddeployk8s
+      ctgydpaas_app_basepkg: com.yundao.cd.deploy.k8s
+      ctgydpaas_app_nameserver: http://localhost:8761/eureka
+    volumes:
+      - ./data/yundao-cd-deploy-k8s/application.yaml:/usr/local/yundao-cd-deploy-k8s/conf/application.yaml
+      - ./data/yundao-cd-deploy-k8s/logs/:/usr/local/yundao-cd-deploy-k8s/log/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 9001" ]
+
+  yundao-cd-deploy-host:
+    container_name: yundao-cd-deploy-host
+    image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-deploy-host-466/cd-deploy-host:0.9.1
+    restart: always
+    ports:
+      - "31997:5004"
+    environment:
+      JAVA_OPTS: -server -Xmx2688M -Xms2688M -Xmn960M
+      ctgydpaas_app_name: cddeployhost
+      ctgydpaas_app_basepkg: com.yundao.cd.deploy.host
+      ctgydpaas_app_nameserver: http://localhost:8761/eureka
+    volumes:
+      - ./data/yundao-cd-deploy-host/application.yaml:/usr/local/yundao-cd-deploy-host/conf/application.yaml
+      - ./data/yundao-cd-deploy-host/logs/:/usr/local/yundao-cd-deploy-host/log/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 5004" ]
+
+  yundao-cd-deploy-paas:
+    container_name: yundao-cd-deploy-paas
+    image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-deploy-paas-357/cd-deploy-paas:0.9.1
+    restart: always
+    ports:
+      - "31995:8180"
+    environment:
+      JAVA_OPTS: -server -Xmx2688M -Xms2688M -Xmn960M
+      ctgydpaas_app_name: cddeploypaas
+      ctgydpaas_app_basepkg: com.yundao.cd.deploy.paas
+      ctgydpaas_app_nameserver: http://localhost:8761/eureka
+    volumes:
+      - ./data/yundao-cd-deploy-paas/application.yaml:/usr/local/yundao-cd-deploy-paas/conf/application.yaml
+      - ./data/yundao-cd-deploy-paas/logs/:/usr/local/yundao-cd-deploy-paas/log/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8180" ]
+
+  yundao-cd-deploy-paas-direct:
+    container_name: yundao-cd-deploy-direct
+    image: harbor.sh-chinatelecom.yundao.com.cn:8443/yundao-cd-deploy-paas-357/cd-deploy-paas:0.9.1
+    restart: always
+    ports:
+      - "31999:8181"
+    environment:
+      JAVA_OPTS: -server -Xmx2688M -Xms2688M -Xmn960M
+      ctgydpaas_app_name: cddeploypaasdirect
+      ctgydpaas_app_basepkg: com.yundao.cd.deploy.paas
+      ctgydpaas_app_nameserver: http://localhost:8761/eureka
+    volumes:
+      - ./data/yundao-cd-deploy-paas-direct/application.yaml:/usr/local/yundao-cd-deploy-paas/conf/application.yaml
+      - ./data/yundao-cd-deploy-paas-direct/logs/:/usr/local/yundao-cd-deploy-paas/log/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8181" ]
