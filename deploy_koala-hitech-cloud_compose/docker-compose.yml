@@ -14,10 +14,11 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-cloud:0.0.1
     restart: always
     ports:
-      - "8000:8000"
+      - "8088:8088"
     volumes:
-      - ./data/koala-hitech-cloud/logs/:/usr/local/koala-hitech-cloud/logs/
+      - ./data/koala-hitech-cloud/logs/:/usr/local/koala-hitech-cloud/logs/ # 日志目录
+      - ./data/koala-hitech-cloud/db/:/root/h2/ # 数据目录
       # - ./data/koala-hitech-cloud/conf/:/usr/local/koala-hitech-cloud/conf/ # 如果需要改动配置，需要将目录中的配置挂载出来
     healthcheck:
       <<: *default-healthcheck
-      test: [ "CMD-SHELL","nc -z 127.0.0.1 8000" ]
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8088" ]

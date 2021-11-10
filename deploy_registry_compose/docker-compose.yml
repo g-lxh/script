@@ -1,0 +1,48 @@
+# see https://docs.docker.com/registry/recipes/nginx/
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  registry:
+    build:
+      context: build/registry
+      dockerfile: Dockerfile
+    container_name: registry
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/registry:latest
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_AUTH: htpasswd # 开启密码认证,需要自己创建密码文件, eg: docker run --entrypoint htpasswd httpd:2 -Bbn <用户名> <密码> > auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /etc/auth/htpasswd # 默认用户名密码 admin:123
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    volumes:
+      - ./data/registry/:/var/lib/registry/
+    networks:
+      - registry-net
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 5000" ]
+
+  registry-nginx:
+    build:
+      context: build/nginx
+      dockerfile: Dockerfile
+    container_name: registry-nginx
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/registry-nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - registry-net
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s http://127.0.0.1:443 > /dev/null 2>&1" ]
+
+networks:
+  registry-net:

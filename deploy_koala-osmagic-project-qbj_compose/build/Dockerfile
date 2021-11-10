@@ -10,8 +10,7 @@ RUN set -eux; \
     echo $TZ > /etc/timezone
 
 # 应用程序
-ENV app_dir=/usr/local/koala-hitech-cloud
-ADD koala-hitech-cloud-*-pkg.tar.gz ${app_dir}
-ADD application.yml ${app_dir}/conf/
-EXPOSE 8088
-CMD ${app_dir}/bin/run.sh
+ENV app_dir=/usr/local/koala-osmagic-project-qbj/
+ADD osmagic-project-qbj-*.jar ${app_dir}
+EXPOSE 8100
+CMD cd ${app_dir} && java -jar osmagic-project-qbj-1.0.jar
