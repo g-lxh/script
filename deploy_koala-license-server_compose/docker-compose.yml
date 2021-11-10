@@ -8,8 +8,8 @@ x-default-healthcheck: &default-healthcheck
 services:
   license-server:
     build:
-      context: build
-      dockerfile: Dockerfile_license-server
+      context: build/license-server
+      dockerfile: Dockerfile
     container_name: license-server
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-server:1.0
     restart: always
@@ -25,8 +25,8 @@ services:
 
   license-server-web:
     build:
-      context: build
-      dockerfile: Dockerfile_license-web
+      context: build/license-web
+      dockerfile: Dockerfile
     container_name: license-server-web
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-server-web:1.0
     restart: always
