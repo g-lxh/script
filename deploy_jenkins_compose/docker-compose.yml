@@ -8,7 +8,7 @@ x-default-healthcheck: &default-healthcheck
 services:
   jenkins:
     container_name: jenkins
-    image: jenkins/jenkins:2.246
+    image: jenkins/jenkins:latest
     restart: always
     entrypoint:
       - /bin/sh

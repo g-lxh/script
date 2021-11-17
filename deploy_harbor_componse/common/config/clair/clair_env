@@ -1,3 +1,0 @@
-HTTP_PROXY=
-HTTPS_PROXY=
-NO_PROXY=.internal,core,postgresql,redis,jobservice,.local,notary-server,clair-adapter,chartmuseum,nginx,db,registry,trivy-adapter,localhost,portal,notary-signer,clair,127.0.0.1,log,registryctl
