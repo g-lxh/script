@@ -8,18 +8,11 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   registry:
-    build:
-      context: build/registry
-      dockerfile: Dockerfile
     container_name: registry
-    image: registry.cn-hangzhou.aliyuncs.com/linxh/registry:latest
+    image: registry:2.7.1
     restart: always
     ports:
       - "5000:5000"
-    environment:
-      REGISTRY_AUTH: htpasswd # 开启密码认证,需要自己创建密码文件, eg: docker run --entrypoint htpasswd httpd:2 -Bbn <用户名> <密码> > auth/htpasswd
-      REGISTRY_AUTH_HTPASSWD_PATH: /etc/auth/htpasswd # 默认用户名密码 admin:123
-      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
     volumes:
       - ./data/registry/:/var/lib/registry/
     networks:
@@ -42,7 +35,7 @@ services:
       - registry-net
     healthcheck:
       <<: *default-healthcheck
-      test: [ "CMD-SHELL","curl -s http://127.0.0.1:443 > /dev/null 2>&1" ]
+      test: [ "CMD-SHELL","curl -s https://127.0.0.1:443/v2/ > /dev/null 2>&1" ]
 
 networks:
   registry-net:

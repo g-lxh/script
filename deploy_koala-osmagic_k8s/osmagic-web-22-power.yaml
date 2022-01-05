@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-22-learn-power
+spec:
+  ports:
+    - name: power
+      nodePort: 47202
+      port: 7202
+      protocol: TCP
+      targetPort: 7202
+  selector:
+    app: web-22-learn-power
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-22-learn-power
+spec:
+  selector:
+    matchLabels:
+      app: web-22-learn-power
+  template:
+    metadata:
+      labels:
+        app: web-22-learn-power
+    spec:
+      containers:
+        - name: 22-learn-power
+          image: hub.kaolayouran.cn:5000/osmagic-all/web-22-learn-power:20211208190033-39
+          ports:
+            - name: power
+              containerPort: 7202
+              protocol: TCP
+          env:
+            - name: OSMAGIC_GOFASTDFS
+              value: http://gofastdfs:38095
+            - name: DNS_SERVER
+              value: 10.96.0.10
+          volumeMounts:
+            - name: 22-learn-power-configmap
+              mountPath: /etc/nginx/templates/web.conf.template
+              subPath: web.conf.template
+      volumes:
+        - name: 22-learn-power-configmap
+          configMap:
+            name: osmagic-web-22-power-cm

@@ -1,0 +1,7 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: build
+      dockerfile: Dockerfile
+    image: reg.harbor.com:30003/library/train/init:3.15.0

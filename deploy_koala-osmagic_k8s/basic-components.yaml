@@ -1,0 +1,9 @@
+---
+
+
+common-monitor-grafana                         /run.sh                          Up             0.0.0.0:30000->3000/tcp,:::30000->3000/tcp
+common-monitor-prometheus-node-cadvisor        /usr/bin/cadvisor -logtost ...   Up (healthy)   0.0.0.0:8080->8080/tcp,:::8080->8080/tcp
+common-monitor-prometheus-node-dcgm-exporter   /usr/local/dcgm/dcgm-expor ...   Up             0.0.0.0:9400->9400/tcp,:::9400->9400/tcp
+common-monitor-prometheus-node-exporter        /opt/bitnami/node-exporter ...   Up             0.0.0.0:9100->9100/tcp,:::9100->9100/tcp
+common-monitor-prometheus-server               /opt/bitnami/prometheus/bi ...   Up             0.0.0.0:9090->9090/tcp,:::9090->9090/tcp
+common-store-milvus                            /tini -- /var/lib/milvus/b ...   Up             0.0.0.0:49121->19121/tcp,:::49121->19121/tcp, 0.0.0.0:49530->19530/tcp,:::49530->19530/tcp

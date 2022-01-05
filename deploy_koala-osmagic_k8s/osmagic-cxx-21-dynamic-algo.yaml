@@ -1,0 +1,79 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cxx-21-dynamic-algo
+spec:
+  ports:
+    - name: cxx-21-dynamic-algo
+      port: 10000
+      protocol: TCP
+      targetPort: 10000
+  selector:
+    app: cxx-21-dynamic-algo
+
+---
+# 驱动安装
+# 查看型号：lspci | grep -i vga
+# nvidia 驱动 see https://www.nvidia.cn/Download/index.aspx?lang=cn
+# sh NVIDIA-Linux-x86_64-470.94.run -s
+# NVIDIA docker 安装
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#getting-started
+# distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
+# yum clean expire-cache && yum install -y nvidia-docker2 && systemctl reload docker
+# docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxx-21-dynamic-algo
+spec:
+  selector:
+    matchLabels:
+      app: cxx-21-dynamic-algo
+  template:
+    metadata:
+      labels:
+        app: cxx-21-dynamic-algo
+    spec:
+      containers:
+        - name: 21-dynamic-algo
+          image: hub.kaolayouran.cn:5000/osmagic-all/micro-algo-dynamic/city-manger:20211207141017-38
+          command: ["/bin/bash", "-c", "/root/koala/osmagic/start.sh"]
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "0"
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: video,compute,utility
+            - name: EurekaClientEnable
+              value: "true"
+            - name: EurekaInstanceName
+              value: osmagic-algo-dynamic
+            - name: EurekaInstanceIp
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: EurekaInstancePort
+              value: "6666"
+            - name: EurekaClientServiceUrlDefaultZone
+              value: java-01-micro-eureka-01:6100
+            - name: EurekaInstanceHeartRate
+              value: "30"
+            - name: EurekaInstanceHttpThreadSize
+              value: "8"
+            - name: AuthorizationServerHost
+              value: 192.168.2.82:12000
+            - name: AuthorizationServerRefreshTime
+              value: "60"
+          ports:
+            - name: power
+              containerPort: 10000
+              protocol: TCP
+          volumeMounts:
+            - name: 21-dynamic-algo-persistent-storage
+              mountPath: /root/koala/osmagic/serial
+              subPath: serial
+      volumes:
+        - name: 21-dynamic-algo-persistent-storage
+          persistentVolumeClaim:
+            claimName: osmagic-cxx-21-dynamic-algo-pv-claim

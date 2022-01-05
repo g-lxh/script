@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - image: pinpointdocker/pinpoint-hbase:2.1.0
-        imagePullPolicy: "Always"
+        imagePullPolicy: Always
         name: pinpoint-hbase
         ports:
         - containerPort: 2181

@@ -1,0 +1,32 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  # darwin:
+  #   build:
+  #     context: build/darwin
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   image: registry.cn-hangzhou.aliyuncs.com/linxh/darwin:8.1.0
+  #   container_name: darwin
+  #   ports:
+  #     - "554:554"
+  #     - "11008:10008"
+  #   environment:
+  #     TZ: 'Asia/Shanghai'
+  #     TASK_INTERVAL: '3'
+  #     STREAM_LOOP_COUNT: '-1'
+
+  ffmpeg-nginx:
+    build:
+      context: build/nginx
+      dockerfile: Dockerfile
+    restart: always
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/ffmpeg-nginx:latest
+    container_name: ffmpeg-nginx
+    ports:
+      - "1935:1935"

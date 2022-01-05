@@ -4,5 +4,5 @@ FROM $base_image
 LABEL maintainer="v.linxh@gmail.com"
 
 # 程序安装
-ADD conf.d/default.conf /etc/nginx/conf.d/
-ADD certs/* /etc/ssl/private/
+ADD dist.tar.gz /usr/share/nginx/html/
+ADD conf.d/web.conf /etc/nginx/conf.d/

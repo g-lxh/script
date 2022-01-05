@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: osmagic-web-22-power-cm
+data:
+  web.conf.template: |
+    server {
+      listen 7202;
+      server_name localhost;
+      client_max_body_size 51200m;
+      resolver ${DNS_SERVER} valid=30s;
+      set $h5s "http://vms:48088";
+      set $vod "http://vms:46606";
+
+      # 业务接口
+      location ~ api/v1|/bower/salt|websocket/camera|/oceanus/pulsar {
+        proxy_pass  http://java-02-micro-gateway:6200;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection Upgrade;
+      }
+
+      # 演示平台告警推送
+      location ~ /power/water {
+        proxy_pass  http://java-02-micro-gateway:6200;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection Upgrade;
+        proxy_read_timeout 600s;
+      }
+
+      # 流媒体实时播放或回放
+      location ~ /realplay|/playback {
+        proxy_pass  $h5s;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection Upgrade;
+      }
+
+      # 流媒体回放下载
+      location ~ /download {
+        proxy_pass  $vod;
+        proxy_http_version 1.1;
+      }
+
+      # GoFastDFS
+      location ~ /group1 {
+        proxy_pass  ${OSMAGIC_GOFASTDFS};
+        proxy_http_version 1.1;
+      }
+
+      # 演示平台Web页面
+      location / {
+        root /data/web;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+      }
+
+      # 错误码重定向
+      error_page 500 502 503 504 /50x.html;
+
+      # 错误页面
+      location = /50x.html {
+        root html;
+      }
+    }

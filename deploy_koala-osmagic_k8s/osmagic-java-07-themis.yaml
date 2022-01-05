@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-07-micro-themis
+spec:
+  ports:
+    - name: themis
+      port: 6700
+      protocol: TCP
+      targetPort: 6700
+  selector:
+    app: java-07-micro-themis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-07-micro-themis
+spec:
+  selector:
+    matchLabels:
+      app: java-07-micro-themis
+  template:
+    metadata:
+      labels:
+        app: java-07-micro-themis
+    spec:
+      containers:
+        - name: 07-micro-themis
+          image: hub.kaolayouran.cn:5000/osmagic-all/java-07-micro-themis:20211208190033-39
+          command: [ "sh", "/home/java/start.sh" ]
+          env:
+            - name: PARAMETER
+              value: --spring.profiles.active=k8s
+            - name: JVM_PARAMETER
+              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+            - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_USERNAME
+              value: osmagic
+            - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_URL
+              value: "jdbc:mysql://mysql:3306/osmagic?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8"
+            - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_PASSWORD
+              value: "Koala_MySQL#20Xx..A.."
+          ports:
+            - name: themis
+              containerPort: 6700
+              protocol: TCP

@@ -7,21 +7,15 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   mongo:
-    build:
-      context: build/mongo
-      dockerfile: Dockerfile
     container_name: mongo
-    image: registry.cn-hangzhou.aliyuncs.com/linxh/mongo:latest
+    image: bitnami/mongodb:4.4.10
     restart: always
+    ports:
+      - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: yapi
-      MONGO_USERNAME: yapi
-      MONGO_PASSWORD: yapi
+      MONGODB_ROOT_PASSWORD: root
     volumes:
-      - ./data/mongo/db/:/data/db/
-      - ./data/mongo/config/:/data/config/
+      - ./data/mongo:/bitnami/mongodb
 
   yapi:
     build:
@@ -29,14 +23,17 @@ services:
       dockerfile: Dockerfile
     container_name: yapi
     image: registry.cn-hangzhou.aliyuncs.com/linxh/yapi:latest
+    command:
+      - /bin/sh
+      - -c
+      # 如果服务无法访问,请执行: node server/install.js 初始化
+      #- sleep 3 && node /yapi/vendors/server/install.js
+      - sleep 3 && node /yapi/vendors/server/app.js
     restart: always
     ports:
-      - "19090:9090"
       - "13000:3000"
     depends_on:
       - mongo
-    volumes:
-      - ./data/yapi/:/my-yapi/
     healthcheck:
       <<: *default-healthcheck
-      test: [ "CMD-SHELL","nc -z 127.0.0.1 9090" ]
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 3000" ]

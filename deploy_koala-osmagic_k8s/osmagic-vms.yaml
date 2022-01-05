@@ -1,0 +1,232 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vms
+spec:
+  ports:
+    - name: rtsp
+      nodePort: 40554
+      port: 40554
+      protocol: TCP
+      targetPort: 40554
+    - name: rtmp-ctrl
+      nodePort: 48082
+      port: 48082
+      protocol: TCP
+      targetPort: 48082
+    - name: rtsp-ctrl
+      nodePort: 48083
+      port: 48083
+      protocol: TCP
+      targetPort: 48083
+    - name: tcp-passive
+      nodePort: 48084
+      port: 48084
+      protocol: TCP
+      targetPort: 48084
+    - name: listenport
+      nodePort: 48088
+      port: 48088
+      protocol: TCP
+      targetPort: 48088
+    - name: rtsp-48554
+      nodePort: 48554
+      port: 48554
+      protocol: TCP
+      targetPort: 48554
+    - name: rtsp-ctrl-48081
+      nodePort: 48081
+      port: 48081
+      protocol: TCP
+      targetPort: 48081
+    - name: media-ctrl
+      nodePort: 48021
+      port: 48021
+      protocol: TCP
+      targetPort: 48021
+    - name: src-tcp-passive
+      nodePort: 49100
+      port: 49100
+      protocol: TCP
+      targetPort: 49100
+    - name: dst-tcp-passive
+      nodePort: 49200
+      port: 49200
+      protocol: TCP
+      targetPort: 49200
+    - name: src-udp-1
+      nodePort: 41000
+      port: 41000
+      protocol: UDP
+      targetPort: 41000
+    - name: src-udp-2
+      nodePort: 41004
+      port: 41004
+      protocol: UDP
+      targetPort: 41004
+    - name: dst-udp-1
+      nodePort: 42000
+      port: 42000
+      protocol: UDP
+      targetPort: 42000
+    - name: dst-udp-2
+      nodePort: 42004
+      port: 42004
+      protocol: UDP
+      targetPort: 42004
+    - name: vms-mss
+      nodePort: 48089
+      port: 48089
+      protocol: TCP
+      targetPort: 48089
+    - name: vms-sip-udp
+      nodePort: 45060
+      port: 45060
+      protocol: UDP
+      targetPort: 45060
+    - name: media-ctrl-48020
+      nodePort: 48020
+      port: 48020
+      protocol: TCP
+      targetPort:
+    - name: download
+      nodePort: 46606
+      port: 46606
+      protocol: TCP
+      targetPort: 46606
+  selector:
+    app: vms
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vms
+spec:
+  selector:
+    matchLabels:
+      app: vms
+  template:
+    metadata:
+      labels:
+        app: vms
+    spec:
+      hostAliases:
+        - ip: "192.168.2.147"
+          hostnames:
+            - "localname"
+      containers:
+        - name: vms-h5s
+          image: hub.kaolayouran.cn:5000/osmagic-all/ubuntu_vms:2.0
+          workingDir: /opt/h5s
+          command: [ "/bin/sh", "-c", "./h5stream" ]
+          ports:
+            - name: rtsp
+              containerPort: 40554
+              protocol: TCP
+            - name: rtmp-ctrl
+              containerPort: 48082
+              protocol: TCP
+            - name: rtsp-ctrl
+              containerPort: 48083
+              protocol: TCP
+            - name: tcp-passive
+              containerPort: 48084
+              protocol: TCP
+          volumeMounts:
+            - name: vms-persistent-storage
+              mountPath: /opt/h5s
+              subPath: h5s
+        - name: vms-mgw
+          image: hub.kaolayouran.cn:5000/osmagic-all/ubuntu_vms:2.0
+          workingDir: /opt/mediagw
+          command: [ "/bin/sh", "-c", "./mediagw" ]
+          ports:
+            - name: rtsp
+              containerPort: 48554
+              protocol: TCP
+            - name: rtsp-ctrl
+              containerPort: 48081
+              protocol: TCP
+          volumeMounts:
+            - name: vms-persistent-storage
+              mountPath: /opt/mediagw
+              subPath: mediagw
+        - name: vms-mrs
+          image: hub.kaolayouran.cn:5000/osmagic-all/ubuntu_vms:2.0
+          workingDir: /opt/mrs
+          command: [ "/bin/sh", "-c", "./mrs" ]
+          ports:
+            - name: media-ctrl
+              containerPort: 48021
+              protocol: TCP
+            - name: src-tcp-passive
+              containerPort: 49100
+              protocol: TCP
+            - name: dst-tcp-passive
+              containerPort: 49200
+              protocol: TCP
+            - name: src-udp-1
+              containerPort: 41000
+              protocol: UDP
+            - name: src-udp-2
+              containerPort: 41004
+              protocol: UDP
+            - name: dst-udp-1
+              containerPort: 42000
+              protocol: UDP
+            - name: dst-udp-2
+              containerPort: 42004
+              protocol: UDP
+          volumeMounts:
+            - name: vms-persistent-storage
+              mountPath: /opt/mrs
+              subPath: mrs
+        - name: vms-mss
+          image: hub.kaolayouran.cn:5000/osmagic-all/ubuntu_vms:2.0
+          workingDir: /opt/mss
+          command: [ "/bin/sh", "-c", "./mss" ]
+          ports:
+            - name: vms-mss
+              protocol: TCP
+              containerPort: 48089
+          volumeMounts:
+            - name: vms-persistent-storage
+              mountPath: /opt/mss
+              subPath: mss
+        - name: vms-sip
+          image: hub.kaolayouran.cn:5000/osmagic-all/ubuntu_vms:2.0
+          workingDir: /opt/sipsvr
+          command: [ "/bin/sh", "-c", "./sipsvr" ]
+          ports:
+            - name: vms-sip
+              containerPort: 45060
+              protocol: UDP
+            - name: media-ctrl
+              containerPort: 48020
+              protocol: TCP
+          volumeMounts:
+            - name: vms-persistent-storage
+              mountPath: /opt/sipsvr
+              subPath: sipsvr
+        - name: vms-vod
+          image: hub.kaolayouran.cn:5000/osmagic-all/ubuntu_vms:2.0
+          workingDir: /opt/vod
+          command: [ "/bin/sh", "-c", "./vod" ]
+          ports:
+            - name: download
+              containerPort: 46606
+              protocol: TCP
+          volumeMounts:
+            - name: vms-persistent-storage
+              mountPath: /opt/vod
+              subPath: vod
+            - name: vms-persistent-storage
+              mountPath: /media
+              subPath: media
+      volumes:
+        - name: vms-persistent-storage
+          persistentVolumeClaim:
+            claimName: osmagic-vms-pv-claim

@@ -1,0 +1,11 @@
+---
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+parameters:
+  # 删除pvc是否保留数据，"true" 保留
+  archiveOnDelete: "true"
+  readOnly: "false"
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner

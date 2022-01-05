@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-23-learn-tower
+spec:
+  ports:
+    - name: power
+      nodePort: 47302
+      port: 7302
+      protocol: TCP
+      targetPort: 7302
+  selector:
+    app: web-23-learn-tower
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-23-learn-tower
+spec:
+  selector:
+    matchLabels:
+      app: web-23-learn-tower
+  template:
+    metadata:
+      labels:
+        app: web-23-learn-tower
+    spec:
+      containers:
+        - name: 23-learn-tower
+          image: hub.kaolayouran.cn:5000/osmagic-all/web-23-learn-tower:20211220104201-10
+          ports:
+            - name: power
+              containerPort: 7302
+              protocol: TCP
+          volumeMounts:
+            - name: 23-learn-tower-configmap
+              mountPath: /etc/nginx/conf.d/web.conf
+              subPath: web.conf
+      volumes:
+        - name: 23-learn-tower-configmap
+          configMap:
+            name: osmagic-web-23-power-cm

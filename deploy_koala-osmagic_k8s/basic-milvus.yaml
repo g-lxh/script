@@ -1,0 +1,69 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: milvus
+spec:
+  ports:
+    - name: milvus
+      port: 19530
+      protocol: TCP
+      targetPort: 19530
+    - name: milvus-http
+      port: 19121
+      protocol: TCP
+      targetPort: 19121
+  selector:
+    app: milvus
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: milvus
+spec:
+  selector:
+    matchLabels:
+      app: milvus
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: milvus
+    spec:
+      containers:
+        - name: milvus
+          image: hub.kaolayouran.cn:5000/osmagic-all/milvusdb/milvus:1.0.0-cpu-d030521-1ea92e
+          env:
+            - name: ETCD_ENDPOINTS
+              value: milvus:2379
+            - name: MINIO_ADDRESS
+              value: milvus:9000
+          ports:
+            - name: milvus
+              containerPort: 19530
+              protocol: TCP
+            - name: milvus-http
+              containerPort: 19121
+              protocol: TCP
+          volumeMounts:
+            - name: milvus-configmap
+              mountPath: /var/lib/milvus/conf/server_config.yaml
+              subPath: server_config.yaml
+            - name: milvus-persistent-storage
+              mountPath: /var/lib/milvus/db
+              subPath: db
+            - name: milvus-persistent-storage
+              mountPath: /var/lib/milvus/logs
+              subPath: logs
+            - name: milvus-persistent-storage
+              mountPath: /var/lib/milvus/wal
+              subPath: wal
+      volumes:
+        - name: milvus-persistent-storage
+          persistentVolumeClaim:
+            claimName: milvus-pv-claim
+        - name: milvus-configmap
+          configMap:
+            name: milvus-cm

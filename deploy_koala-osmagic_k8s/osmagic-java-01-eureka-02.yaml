@@ -1,0 +1,43 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-01-micro-eureka-02
+spec:
+  ports:
+    - name: eureka
+      nodePort: 46102
+      port: 6100
+      protocol: TCP
+      targetPort: 6100
+  selector:
+    app: java-01-micro-eureka-02
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-01-micro-eureka-02
+spec:
+  selector:
+    matchLabels:
+      app: java-01-micro-eureka-02
+  template:
+    metadata:
+      labels:
+        app: java-01-micro-eureka-02
+    spec:
+      containers:
+        - name: 01-micro-eureka-02
+          image: hub.kaolayouran.cn:5000/osmagic-all/java-01-micro-eureka:20211208190033-39
+          command: [ "sh", "/home/java/start.sh" ]
+          env:
+            - name: PARAMETER
+              value: --spring.profiles.active=k8s02
+            - name: JVM_PARAMETER
+              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+          ports:
+            - name: eureka
+              containerPort: 6100
+              protocol: TCP

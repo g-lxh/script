@@ -8,7 +8,7 @@ x-default-healthcheck: &default-healthcheck
 services:
   koala-hitech-cloud:
     build:
-      context: build
+      context: build/koala-hitech-cloud
       dockerfile: Dockerfile
     container_name: koala-hitech-cloud
     image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-cloud:0.0.1
@@ -22,3 +22,16 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 8088" ]
+
+  koala-hitech-web-cloud:
+    build:
+      context: build/koala-hitech-web-cloud
+      dockerfile: Dockerfile
+    container_name: koala-hitech-web-cloud
+    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-web-cloud:0.0.1
+    restart: always
+    ports:
+      - "80:8080"
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s http://127.0.0.1:8080 > /dev/null 2>&1" ]

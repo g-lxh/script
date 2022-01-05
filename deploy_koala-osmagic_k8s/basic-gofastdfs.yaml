@@ -1,0 +1,62 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gofastdfs
+spec:
+  ports:
+    - name: "38095"
+      nodePort: 38095
+      port: 38095
+      protocol: TCP
+      targetPort: 38095
+  selector:
+    app: gofastdfs
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gofastdfs
+spec:
+  selector:
+    matchLabels:
+      app: gofastdfs
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gofastdfs
+    spec:
+      containers:
+        - image: hub.kaolayouran.cn:5000/osmagic-all/godfs:latest
+          imagePullPolicy: IfNotPresent
+          name: gofastdfs
+          securityContext:
+            privileged: true
+          command: [ "sh", "/opt/dfs/dfs_star.sh" ]
+          env:
+            - name: ACCEPT_EULA
+              value: "true"
+          ports:
+            - name: gofastdfs
+              containerPort: 38095
+              protocol: TCP
+          volumeMounts:
+            - name: proc-host
+              mountPath: /hostip
+            - name: gofastdfs-persistent-storage
+              mountPath: /dfs
+              subPath: dfs
+            - name: gofastdfs-persistent-storage
+              mountPath: /config
+              subPath: config
+      volumes:
+        - name: proc-host
+          hostPath:
+            path: /proc
+        - name: gofastdfs-persistent-storage
+          persistentVolumeClaim:
+            claimName: gofastdfs-pv-claim

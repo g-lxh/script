@@ -1,0 +1,78 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nfs-server
+  name: nfs-server
+spec:
+  ports:
+    - name: "2049"
+      port: 2049
+      protocol: TCP
+      targetPort: 2049
+  selector:
+    app: nfs-server
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-server
+  labels:
+    app: nfs-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nfs-server
+    spec:
+      containers:
+        - name: nfs-server
+          image: gists/nfs-server
+          imagePullPolicy: Always
+          env:
+            - name: NFS_DOMAIN
+              value: "*"
+            - name: NFS_DIR
+              # nfs 目录，默认：/nfs-share
+              value: /nfs-share
+            - name: NFS_OPTION
+              # rw 读写，no_root_squash 客户机用root访问该共享文件夹时，不映射root用户， insecure 允许从这台机器过来的非授权访问
+              value: "fsid=0,rw,sync,insecure,no_root_squash,anonuid=65534,anongid=65534,no_subtree_check,nohide"
+          ports:
+            - containerPort: 2049
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - SETPCAP
+          livenessProbe:
+            timeoutSeconds: 1
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            tcpSocket:
+              port: 2049
+          readinessProbe:
+            timeoutSeconds: 1
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 2049
+          volumeMounts:
+            # 需要与 NFS_DIR 一致
+            - mountPath: /nfs-share
+              name: nfs-server
+      restartPolicy: Always
+      volumes:
+        - hostPath:
+            path: /data/nfs
+            type: DirectoryOrCreate
+          name: nfs-server
