@@ -22,20 +22,20 @@ services:
       test: [ "CMD-SHELL","nc -z 127.0.0.1 5000" ]
 
   registry-nginx:
-    build:
-      context: build/nginx
-      dockerfile: Dockerfile
     container_name: registry-nginx
-    image: registry.cn-hangzhou.aliyuncs.com/linxh/registry-nginx:latest
+    image: nginx:1.21.5-alpine
     restart: always
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./config/nginx/certs/:/etc/ssl/private/
+      - ./config/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - registry-net
     healthcheck:
       <<: *default-healthcheck
-      test: [ "CMD-SHELL","curl -s https://127.0.0.1:443/v2/ > /dev/null 2>&1" ]
+      test: [ "CMD-SHELL","curl -s --insecure https://127.0.0.1/v2/ > /dev/null 2>&1" ]
 
 networks:
   registry-net:
