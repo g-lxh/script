@@ -44,15 +44,33 @@ spec:
               # nfs 目录，默认：/nfs-share
               value: /nfs-share
             - name: NFS_OPTION
-              # rw 读写，no_root_squash 客户机用root访问该共享文件夹时，不映射root用户， insecure 允许从这台机器过来的非授权访问
+              # ro: 共享目录只读
+              # rw: 共享目录可读可写
+              # all_squash: 所有访问用户都映射为匿名用户或用户组
+              # no_all_squash: 访问用户先与本机用户匹配，匹配失败后再映射为匿名用户或用户组
+              # root_squash: 将来访的root用户映射为匿名用户或用户组
+              # no_root_squash: 客户机用root访问该共享文件夹时，不映射root用户
+              # anonuid: 指定匿名访问用户的本地用户UID，默认为nfsnobody（65534）
+              # anongid: 指定匿名访问用户的本地用户组GID，默认为nfsnobody（65534）
+              # secure: 限制客户端只能从小于1024的tcp/ip端口连接服务器
+              # insecure: 允许客户端从大于1024的tcp/ip端口连接服务器
+              # subtree_check: 如果共享/usr/bin之类的子目录时，强制NFS检查父目录的权限（默认）
+              # no_subtree_check: 和上面相对，不检查父目录权限
+              # wdelay: 如果多个用户要写入NFS目录，则归组写入（默认）
+              # no_wdelay: 如果多个用户要写入NFS目录，则立即写入，当使用async时，无需此设置
+              # hide: 在NFS共享目录中不共享其子目录
+              # no_hide: 共享NFS目录的子目录
+              # sync: 文件同时写入硬盘和内存
+              # async: 文件暂存于内存，而不是直接写入内存
               value: "fsid=0,rw,sync,insecure,no_root_squash,anonuid=65534,anongid=65534,no_subtree_check,nohide"
           ports:
             - containerPort: 2049
               protocol: TCP
           securityContext:
+            privileged: true
             capabilities:
               add:
-                - SYS_ADMIN
+                - CAP_SYS_ADMIN
                 - SETPCAP
           livenessProbe:
             timeoutSeconds: 1
@@ -71,8 +89,10 @@ spec:
             - mountPath: /nfs-share
               name: nfs-server
       restartPolicy: Always
+      nodeSelector:
+        kubernetes.io/hostname: master-001
       volumes:
         - hostPath:
-            path: /data/nfs
+            path: /mnt/nfs
             type: DirectoryOrCreate
           name: nfs-server

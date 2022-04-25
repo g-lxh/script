@@ -18,7 +18,7 @@ services:
     environment:
       LOGGING_LEVEL_COM_KOALA_LICENSE: trace
     volumes:
-      - ./data/h2/:/data/H2/
+      - ./data/h2/:/root/H2/
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 12000" ]

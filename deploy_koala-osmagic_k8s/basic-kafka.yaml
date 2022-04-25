@@ -9,7 +9,7 @@ spec:
       nodePort: 49092
       port: 9092
       protocol: TCP
-      targetPort: 9092
+      targetPort: kafka
   selector:
     app: kafka
   type: NodePort
@@ -23,16 +23,15 @@ spec:
   selector:
     matchLabels:
       app: kafka
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: kafka
     spec:
       containers:
-        - image: hub.kaolayouran.cn:5000/osmagic-all/bitnami/kafka:2.5.0
-          name: kafka
+        - name: kafka
+          image: hub.koalauran.cn:30003/component/bitnami/kafka:3.0.1
+          imagePullPolicy: Always
           env:
             - name: ALLOW_PLAINTEXT_LISTENER
               value: "yes"
@@ -49,8 +48,9 @@ spec:
             - name: kafka-persistent-storage
               mountPath: /bitnami/kafka
               subPath: kafka
-        - image: hub.kaolayouran.cn:5000/osmagic-all/bitnami/zookeeper:3.5.9
-          name: zookeeper
+        - name: zookeeper
+          image: hub.koalauran.cn:30003/component/bitnami/zookeeper:3.6.3
+          imagePullPolicy: Always
           env:
             - name: ALLOW_ANONYMOUS_LOGIN
               value: "yes"
@@ -61,6 +61,8 @@ spec:
             - name: kafka-persistent-storage
               mountPath: /bitnami/zookeeper
               subPath: zookeeper
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret
       volumes:
         - name: kafka-persistent-storage
           persistentVolumeClaim:

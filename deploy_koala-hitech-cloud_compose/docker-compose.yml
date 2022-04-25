@@ -11,7 +11,7 @@ services:
       context: build/koala-hitech-cloud
       dockerfile: Dockerfile
     container_name: koala-hitech-cloud
-    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-cloud:0.0.1
+    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-hitech-cloud:0.2.0
     restart: always
     ports:
       - "8088:8088"

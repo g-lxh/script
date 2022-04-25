@@ -42,7 +42,7 @@ data:
     general:
       timezone: UTC+8
       # meta_uri: sqlite://:@:/
-      meta_uri: mysql://osmagic:Koala_MySQL#20Xx..A..@mysql:3306/milvus
+      meta_uri: mysql://root:Koala_MySQL#20Xx..A..@mysql:3306/milvus
 
     #----------------------+------------------------------------------------------------+------------+-----------------+
     # Network Config       | Description                                                | Type       | Default         |

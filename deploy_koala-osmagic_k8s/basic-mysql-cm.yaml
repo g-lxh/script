@@ -5,4 +5,4 @@ metadata:
 data:
   my_custom.cnf: |
     [mysqld]
-    sql_mode=TRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    max_connections=10240 # 连接数设置

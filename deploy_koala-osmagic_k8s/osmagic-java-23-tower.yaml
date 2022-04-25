@@ -8,7 +8,7 @@ spec:
     - name: tower
       port: 7300
       protocol: TCP
-      targetPort: 7300
+      targetPort: tower
   selector:
     app: java-23-learn-tower
 
@@ -28,20 +28,39 @@ spec:
     spec:
       containers:
         - name: 23-learn-tower
-          image: hub.kaolayouran.cn:5000/osmagic-all/java-23-learn-tower:20210908152906-566
+          image: hub.koalauran.cn:30003/osmagic/java-23-learn-tower:20220413182054-283
           command: [ "sh", "/home/java/start.sh" ]
           env:
+            - name: ctl_tool
+              value: nerdctl
             - name: PARAMETER
               value: --spring.profiles.active=k8s
             - name: JVM_PARAMETER
-              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+              value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
             - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_USERNAME
-              value: osmagic
+              value: root
             - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_URL
-              value: "jdbc:mysql://mysql:3306/osmagic?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8"
+              value: jdbc:mysql://mysql:3306/osmagic?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
             - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_PASSWORD
-              value: "Koala_MySQL#20Xx..A.."
+              value: Koala_MySQL#20Xx..A..
+            - name: OSMAGIC_LEARN_HARBOR_ADDRESS
+              value: https://hub.koalauran.cn:30003
           ports:
             - name: tower
               containerPort: 7300
               protocol: TCP
+          volumeMounts:
+            - mountPath: /usr/bin/nerdctl
+              name: ctl-tools
+            - mountPath: /run/containerd/containerd.sock
+              name: containerd-sock
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret
+      volumes:
+        - hostPath:
+            path: /usr/bin/nerdctl
+            type: File
+          name: ctl-tools
+        - hostPath:
+            path: /run/containerd/containerd.sock
+          name: containerd-sock

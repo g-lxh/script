@@ -9,7 +9,7 @@ spec:
       nodePort: 47302
       port: 7302
       protocol: TCP
-      targetPort: 7302
+      targetPort: tower
   selector:
     app: web-23-learn-tower
   type: NodePort
@@ -30,16 +30,23 @@ spec:
     spec:
       containers:
         - name: 23-learn-tower
-          image: hub.kaolayouran.cn:5000/osmagic-all/web-23-learn-tower:20211220104201-10
+          image: hub.koalauran.cn:30003/osmagic/web-23-learn-tower:20220413182054-283
           ports:
-            - name: power
+            - name: tower
               containerPort: 7302
               protocol: TCP
+          env:
+            - name: OSMAGIC_GOFASTDFS
+              value: http://go-fastdfs:38095
+            - name: DNS_SERVER
+              value: 10.96.0.10
           volumeMounts:
             - name: 23-learn-tower-configmap
-              mountPath: /etc/nginx/conf.d/web.conf
-              subPath: web.conf
+              mountPath: /etc/nginx/templates/web.conf.template
+              subPath: web.conf.template
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret
       volumes:
         - name: 23-learn-tower-configmap
           configMap:
-            name: osmagic-web-23-power-cm
+            name: osmagic-web-23-tower-cm

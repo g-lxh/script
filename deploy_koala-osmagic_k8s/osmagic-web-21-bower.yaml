@@ -9,7 +9,7 @@ spec:
       nodePort: 47102
       port: 7102
       protocol: TCP
-      targetPort: 7102
+      targetPort: market
   selector:
     app: web-21-learn-market
   type: NodePort
@@ -30,8 +30,10 @@ spec:
     spec:
       containers:
         - name: 21-learn-market
-          image: hub.kaolayouran.cn:5000/osmagic-all/web-21-learn-market:20211208190033-39
+          image: hub.koalauran.cn:30003/osmagic/web-21-learn-market:20220413182054-283
           ports:
             - name: market
               containerPort: 7102
               protocol: TCP
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret

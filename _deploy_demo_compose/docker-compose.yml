@@ -7,8 +7,8 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   easyconnect:
-    container_name: easyconnect
-    image: hagb/docker-easyconnect:cli
+    container_name: demo
+    image: demo
     restart: always
     ports:
       - "1080:1080"

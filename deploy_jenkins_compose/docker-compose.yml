@@ -17,10 +17,14 @@ services:
     ports:
       - "8080:8080"
     environment:
+      JAVA_HOME: /usr/local/rely/jdk1.8.0_171
+      MAVEN_HOME: /usr/local/rely/apache-maven-3.5.0
+      NODE_HOME: /usr/local/rely/node-v16.14.0-linux-x64
       JENKINS_WAR: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/jenkins.war
       REF: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/ref
     volumes:
       - ./data/jenkins/:/var/jenkins_home/
+      - ./rely/:/usr/local/rely/
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","curl -s 127.0.0.1:8080 > /dev/null 2>&1" ]

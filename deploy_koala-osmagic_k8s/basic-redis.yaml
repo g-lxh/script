@@ -9,7 +9,7 @@ spec:
       nodePort: 46379
       port: 6379
       protocol: TCP
-      targetPort: 6379
+      targetPort: redis
   selector:
     app: redis
   type: NodePort
@@ -23,27 +23,28 @@ spec:
   selector:
     matchLabels:
       app: redis
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: redis
     spec:
       containers:
-        - image: hub.kaolayouran.cn:5000/osmagic-all/bitnami/redis:6.2
-          name: redis
+        - name: redis
+          image: hub.koalauran.cn:30003/component/bitnami/redis:6.2.6
+          imagePullPolicy: Always
           env:
             - name: ALLOW_EMPTY_PASSWORD
               value: "yes"
           ports:
             - name: redis
-              containerPort: 3306
+              containerPort: 6379
               protocol: TCP
           volumeMounts:
             - name: redis-persistent-storage
               mountPath: /bitnami/redis
               subPath: redis
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret
       volumes:
         - name: redis-persistent-storage
           persistentVolumeClaim:

@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vms-web
+spec:
+  ports:
+    - name: vms-web-1935
+      nodePort: 41935
+      port: 1935
+      protocol: TCP
+      targetPort: 1935
+    - name: vms-web-8086
+      nodePort: 48086
+      port: 8086
+      protocol: TCP
+      targetPort: 8086
+  selector:
+    app: vms-web
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vms-web
+spec:
+  selector:
+    matchLabels:
+      app: vms-web
+  template:
+    metadata:
+      labels:
+        app: vms-web
+    spec:
+      hostAliases:
+        - ip: "192.168.2.147"
+          hostnames:
+            - "localname"
+      containers:
+        - name: vms-web
+          image: hub.kaolayouran.cn:5000/osmagic-all/kl-nginx-rtmp_vms:20191009163000
+          workingDir: /usr/local/nginx/sbin
+          command: [ "/usr/local/nginx/sbin/nginx" ]
+          ports:
+            - name: vms-web-1935
+              containerPort: 1935
+              protocol: TCP
+            - name: vms-web-8086
+              containerPort: 8086
+              protocol: TCP
+          volumeMounts:
+            - name: vms-web-persistent-storage
+              mountPath: /usr/local/nginx
+              subPath: nginx
+      volumes:
+        - name: vms-web-persistent-storage
+          persistentVolumeClaim:
+            claimName: osmagic-vms-web-pv-claim

@@ -3,11 +3,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: harbor-pv-claim
-  namespace: harbor
 spec:
   storageClassName: nfs
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
-      storage: 32Gi
+      storage: 50Gi

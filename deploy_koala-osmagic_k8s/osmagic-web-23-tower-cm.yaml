@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: osmagic-web-23-tower-cm
 data:
-  web.conf: |
+  web.conf.template: |
     server {
       listen 7302;
       server_name localhost;
@@ -17,7 +17,7 @@ data:
       }
 
       location ~ /group1 {
-          proxy_pass  http://gofastdfs:38095;
+          proxy_pass  ${OSMAGIC_GOFASTDFS};
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection Upgrade;

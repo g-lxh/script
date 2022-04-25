@@ -7,28 +7,28 @@ spring:
     hikari.pool-name: "North"
     hikari.minimum-idle: 5
     hikari.maximum-pool-size: 15
-    password: root
-    username: root
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:${user.home}/h2/koala-hitech-cloud;MODE=MYSQL
-    schema: classpath:./db/schema.sql
-  h2:
-    console:
-      enabled: true
+    username: koala_hitech_cloud
+    password: '9WMzg66w6_:k*>g)'
+    url: jdbc:mysql://192.168.155.100:43306/koala_hitech_cloud?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 logging:
   config: classpath:logback-spring.xml
   level:
     root: info
     com.osmagic: debug
+    org.springframework.web.servlet.DispatcherServlet: info
 
 osmagic:
   project:
-    callback: http://192.168.111.13:808/hitech/api/v1/receives/call # 回调地址，本服务的可被访问的地址
+    callback: http://192.168.155.100:8088/hitech/api/v1/receives/call # 回调地址，本服务的可被访问的地址
   huawei:
     endpoint: https://192.168.155.194:18531 # 华为接口地址，用于获取流地址
     username: vcm-api01
     password: HWapi@123
+  gofastdfs:
+    endpoint: http://192.168.155.100:38095 # 码极客 gofastdfs 地址
+    expired: 15 # 天
   platform:
     endpoint: http://192.168.155.100:46200 # 码极客地址
   image:
@@ -37,7 +37,7 @@ osmagic:
     endpoint: http://192.168.155.133:86 # 大数据接口地址
     token: "q0NyUq7kyeTsQH_vMS6H-6o-_szgi2qTcBPhOHkuDyI"
   jgzx:
-    endpoint: http://172.20.10.3:8085
+    endpoint: http://192.168.155.8:8080
     token: "e74600c9104711ec8af900163e085b9e"
     vehicle-driving-record: /jgzx-manage/a/thirdAPI/cehicleIdentification # 车辆行驶记录
     vehicle-offset-record: /jgzx-manage/a/vehicleAlarmRecord/warningInformationPush # 车辆偏移
@@ -45,16 +45,37 @@ osmagic:
   xgzx:
     endpoint: http://192.168.155.67
   push:
+    alarm-interval: 5 # 告警间隔 秒(s)
     auto-bind:
-      - VehicleLicenseRecon # 车辆识别
-      - UnexpectedEvents # 人员聚集
+      - PersonNumberChangeSnap # 人员检测 「协管中心」
+      - SingleVehicleSnap # 车辆识别「监管中心、协管中心」
+      - FireOrSmokeDetected # 明火烟雾 「监管中心」
+      - MotorVehicleIllegalParking # 主干道违停 「监管中心」
+      - VehicleNumberByJamParam # 道路拥堵 「监管中心」
+      - PedestrianGathering # 人员聚集 「监管中心」
+      - AllVehicleIntervalSnap # 停车场 「监管中心」
+      - TrafficAccident # 碰撞 「监管中心」
+      - Retrograde # 逆行 「监管中心」
+    auto-start:
+      - PersonNumberChangeSnap # 人员检测 「协管中心」
+      - SingleVehicleSnap # 车辆识别「监管中心、协管中心」
     monitoring-type:
-      1: VehicleLicenseRecon # 车辆识别
-      3: 3 # 车辆偏移
-      4: 4 # 车辆碰撞
-      5: 5 # 车辆布控
+      1: SingleVehicleSnap # 车辆行驶记录
+      3: SingleVehicleSnap # 车辆偏移
+      4: TrafficAccident # 车辆碰撞
+      5: SingleVehicleSnap # 车辆布控
       6: FireOrSmokeDetected # 明火烟雾
-      7: MotorVehicleParking # 主干道违停
-      8: 8 # 道路拥堵
-      9: UnexpectedEvents # 人员聚集
-      10: UnexpectedEvents # 人员检测
+      7: MotorVehicleIllegalParking # 主干道违停
+      8: VehicleNumberByJamParam # 道路拥堵
+      9: PedestrianGathering # 人员聚集
+      10: Retrograde # 逆行
+    color:
+      Others: "other" # 其他色
+      White: "#FFFFFF" # 白色
+      Black: "#000000" # 黑色
+      Gray: "#808080" # 灰色
+      Red: "#FF0000" # 红色
+      Green: "#008000" # 绿色
+      Blue: "#0000FF" # 蓝色
+      Yellow: "#FFFF00" # 黄色
+      Brown: "#A52A2A" # 棕色

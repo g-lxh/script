@@ -19,8 +19,12 @@ spec:
 # sh NVIDIA-Linux-x86_64-470.94.run -s
 # NVIDIA docker 安装
 # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#getting-started
+## Centos
 # distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
 # yum clean expire-cache && yum install -y nvidia-docker2 && systemctl reload docker
+## Ubuntu and Debian
+# distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+# apt-get update && apt-get install -y nvidia-docker2
 # docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
 apiVersion: apps/v1
 kind: Deployment
@@ -38,7 +42,7 @@ spec:
       containers:
         - name: 21-dynamic-algo
           image: hub.kaolayouran.cn:5000/osmagic-all/micro-algo-dynamic/city-manger:20211207141017-38
-          command: ["/bin/bash", "-c", "/root/koala/osmagic/start.sh"]
+          # command: ["/bin/bash", "-c", "/root/koala/osmagic/start.sh"]
           env:
             - name: NVIDIA_VISIBLE_DEVICES
               value: "0"

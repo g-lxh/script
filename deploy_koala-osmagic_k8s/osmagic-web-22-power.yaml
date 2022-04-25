@@ -9,7 +9,7 @@ spec:
       nodePort: 47202
       port: 7202
       protocol: TCP
-      targetPort: 7202
+      targetPort: power
   selector:
     app: web-22-learn-power
   type: NodePort
@@ -30,14 +30,14 @@ spec:
     spec:
       containers:
         - name: 22-learn-power
-          image: hub.kaolayouran.cn:5000/osmagic-all/web-22-learn-power:20211208190033-39
+          image: hub.koalauran.cn:30003/osmagic/web-22-learn-power:20220413182054-283
           ports:
             - name: power
               containerPort: 7202
               protocol: TCP
           env:
             - name: OSMAGIC_GOFASTDFS
-              value: http://gofastdfs:38095
+              value: http://go-fastdfs:38095
             - name: DNS_SERVER
               value: 10.96.0.10
           volumeMounts:
@@ -48,3 +48,5 @@ spec:
         - name: 22-learn-power-configmap
           configMap:
             name: osmagic-web-22-power-cm
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret

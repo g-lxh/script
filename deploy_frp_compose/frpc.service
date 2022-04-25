@@ -1,0 +1,15 @@
+[Unit]
+Description=frpc service
+After=network.target network-online.target syslog.target
+Wants=network.target network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+
+#启动服务的命令（此处写你的frpc的实际安装目录）
+ExecStart=/home/lin/frp_0.38.0_linux_amd64/frpc -c /home/lin/frp_0.38.0_linux_amd64/frpc.ini
+
+[Install]
+WantedBy=multi-user.target

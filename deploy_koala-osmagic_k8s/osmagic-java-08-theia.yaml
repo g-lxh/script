@@ -8,7 +8,7 @@ spec:
     - name: theia
       port: 6800
       protocol: TCP
-      targetPort: 6800
+      targetPort: theia
   selector:
     app: java-08-micro-theia
 
@@ -28,20 +28,26 @@ spec:
     spec:
       containers:
         - name: 08-micro-theia
-          image: hub.kaolayouran.cn:5000/osmagic-all/java-08-micro-theia:20211208190033-39
+          image: hub.koalauran.cn:30003/osmagic/java-08-micro-theia:20220413182054-283
           command: [ "sh", "/home/java/start.sh" ]
           env:
             - name: PARAMETER
               value: --spring.profiles.active=k8s
             - name: JVM_PARAMETER
-              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+              value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
             - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_USERNAME
-              value: osmagic
+              value: root
             - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_URL
-              value: "jdbc:mysql://mysql:3306/osmagic?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8"
+              value: jdbc:mysql://mysql:3306/osmagic?useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
             - name: SPRING_DATASOURCE_DYNAMIC_DATASOURCE_SQL_PASSWORD
-              value: "Koala_MySQL#20Xx..A.."
+              value: Koala_MySQL#20Xx..A..
+            - name: SPRING_REDIS_URL
+              value: redis://redis:6379
+            - name: OSMAGIC_LEARN_GOFASTDFS_URL
+              value: http://gofastdfs:38095/group1
           ports:
             - name: theia
               containerPort: 6800
               protocol: TCP
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret

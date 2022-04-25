@@ -6,8 +6,8 @@ x-default-healthcheck: &default-healthcheck
   start_period: 10s
 
 services:
-  go-fastdfs:
-    container_name: go-fastdfs
+  go-fastdfs-01:
+    container_name: go-fastdfs-01
     image: sjqzhang/go-fastdfs
     restart: always
     ports:
@@ -15,7 +15,61 @@ services:
     environment:
       GO_FASTDFS_DIR: /data
     volumes:
-      - ./data/go-fastdfs/:/data/
+      - ./conf/go-fastdfs-01/conf/cfg.json:/data/conf/cfg.json:ro
+      - ./data/go-fastdfs-01/:/data/
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
+
+  go-fastdfs-02:
+    profiles:
+      - cluster
+    container_name: go-fastdfs-02
+    image: sjqzhang/go-fastdfs
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      GO_FASTDFS_DIR: /data
+    volumes:
+      - ./conf/go-fastdfs-02/conf/cfg.json:/data/conf/cfg.json:ro
+      - ./data/go-fastdfs-02/:/data/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
+
+  go-fastdfs-03:
+    profiles:
+      - cluster
+    container_name: go-fastdfs-03
+    image: sjqzhang/go-fastdfs
+    restart: always
+    ports:
+      - "8083:8080"
+    environment:
+      GO_FASTDFS_DIR: /data
+    volumes:
+      - ./conf/go-fastdfs-03/conf/cfg.json:/data/conf/cfg.json:ro
+      - ./data/go-fastdfs-03/:/data/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
+
+  go-fastdfs-nginx:
+    profiles:
+      - cluster
+    container_name: go-fastdfs-nginx
+    image: nginx:latest
+    restart: always
+    extra_hosts:
+      - "upload1:127.0.0.1"
+      - "upload2:127.0.0.1"
+      - "upload3:127.0.0.1"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf/nginx/conf.d/:/etc/nginx/conf.d/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s http://127.0.0.1:80 > /dev/null 2>&1" ]

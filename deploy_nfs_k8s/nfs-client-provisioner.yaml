@@ -35,7 +35,7 @@ subjects:
   - kind: ServiceAccount
     name: nfs-client-provisioner
     # replace with namespace where provisioner is deployed
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: nfs-client-provisioner-runner

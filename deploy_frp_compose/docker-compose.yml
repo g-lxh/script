@@ -16,7 +16,7 @@ services:
     ports:
       - "7000-7050:7000-7050"
     environment:
-      - FRP_TOKEN=123
+      FRP_TOKEN: 123
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 7000" ]

@@ -8,11 +8,11 @@ spec:
     - name: milvus
       port: 19530
       protocol: TCP
-      targetPort: 19530
+      targetPort: milvus
     - name: milvus-http
       port: 19121
       protocol: TCP
-      targetPort: 19121
+      targetPort: milvus-http
   selector:
     app: milvus
 
@@ -25,8 +25,6 @@ spec:
   selector:
     matchLabels:
       app: milvus
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -34,12 +32,9 @@ spec:
     spec:
       containers:
         - name: milvus
-          image: hub.kaolayouran.cn:5000/osmagic-all/milvusdb/milvus:1.0.0-cpu-d030521-1ea92e
-          env:
-            - name: ETCD_ENDPOINTS
-              value: milvus:2379
-            - name: MINIO_ADDRESS
-              value: milvus:9000
+          # 程序客户端使用 1.0.0 ，故无法升级
+          image: hub.koalauran.cn:30003/component/milvusdb/milvus:1.0.0-cpu-d030521-1ea92e
+          imagePullPolicy: Always
           ports:
             - name: milvus
               containerPort: 19530
@@ -60,6 +55,8 @@ spec:
             - name: milvus-persistent-storage
               mountPath: /var/lib/milvus/wal
               subPath: wal
+      imagePullSecrets:
+        - name: harbor-192.168.2.51-image-pull-secret
       volumes:
         - name: milvus-persistent-storage
           persistentVolumeClaim:

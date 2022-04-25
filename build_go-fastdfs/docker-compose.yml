@@ -1,0 +1,7 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: build
+      dockerfile: Dockerfile
+    image: hub.koalauran.cn:30003/component/sjqzhang/go-fastdfs:v1.4.3
