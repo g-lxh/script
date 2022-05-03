@@ -1,0 +1,7 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: build
+      dockerfile: Dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/alpine-golang:1.18.1

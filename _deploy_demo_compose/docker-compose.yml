@@ -1,3 +1,4 @@
+# export https_proxy=http://${HOST}:7890 http_proxy=http://${HOST}:7890 all_proxy=socks5://127.0.0.1:7890;
 version: '3'
 x-default-healthcheck: &default-healthcheck
   interval: 30s

@@ -1,0 +1,12 @@
+version: '3'
+services:
+  frps:
+    build:
+      context: build/frps
+      dockerfile: Dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/frps:v0.42.0
+  frpc:
+    build:
+      context: build/frpc
+      dockerfile: Dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/frpc:v0.42.0

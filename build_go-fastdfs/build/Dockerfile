@@ -12,6 +12,7 @@ RUN set -xe; \
 	export GO111MODULE="off"; \
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o fileserver; \
 	ls -lh .;
+
 FROM registry.cn-hangzhou.aliyuncs.com/prince/alpine-bash
 
 COPY --from=builder /root/repo/src/github.com/sjqzhang/go-fastdfs/fileserver /
