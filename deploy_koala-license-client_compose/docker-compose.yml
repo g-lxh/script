@@ -8,10 +8,10 @@ x-default-healthcheck: &default-healthcheck
 services:
   license-client:
     build:
-      context: build
+      context: build/license-client
       dockerfile: Dockerfile
     container_name: license-client
-    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-client:1.0
+    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-client:2.0
     restart: always
     ports:
       - "12000:12000"
@@ -19,6 +19,25 @@ services:
       LOGGING_LEVEL_COM_KOALA_LICENSE: trace
     volumes:
       - ./data/h2/:/root/H2/
+    networks:
+      - license_client
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 12000" ]
+
+  license-client-web:
+    build:
+      context: build/license-client-web
+      dockerfile: Dockerfile
+    container_name: license-client-web
+    image: registry.cn-hangzhou.aliyuncs.com/koalauran/koala-license-client-web:2.0
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - license_client
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s 127.0.0.1:80 > /dev/null 2>&1" ]
+networks:
+  license_client:

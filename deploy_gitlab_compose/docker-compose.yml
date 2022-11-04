@@ -5,61 +5,27 @@ x-default-healthcheck: &default-healthcheck
   retries: 2
   start_period: 10s
 
+# 参考：https://docs.gitlab.com/ee/install/docker.html?_gl=1*1xdsyr3*_ga*ODc2NDY3NTUwLjE2NjA1NzA4Nzc.*_ga_ENFH3X7M5Y*MTY2MDU3MDg3Ny4xLjEuMTY2MDU3MDkyMi4w#install-gitlab-using-docker-compose
 
 services:
   gitlab-ce:
     container_name: gitlab-ce
-    image: gitlab/gitlab-ce:11.8.0-ce.0
+    image: gitlab/gitlab-ce:15.2.2-ce.0
     restart: always
-    hostname: 127.0.0.1
+    hostname: git.funnyviki.com
     ports:
       - '80:80'
       - '443:443'
-      - '22:22'
+      - '222:22'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.example.com'
-        postgresql['enable'] = false
-        gitlab_rails['db_adapter'] = 'postgresql'
-        gitlab_rails['db_encoding'] = 'utf8'
-        gitlab_rails['db_host'] = 'postgresql'
-        gitlab_rails['db_port'] = '5432'
-        gitlab_rails['db_username'] = 'postgres'
-        gitlab_rails['db_password'] = 'Ideal@015'
-        gitlab_rails['db_database'] = "gitlab"
-        redis['enable'] = false
-        gitlab_rails['redis_host'] = 'redis'
-        gitlab_rails['redis_port'] = 6379
-        gitlab_rails['redis_password'] = 'Ideal@015'
-        gitlab_rails['redis_database'] = 1
+        external_url 'https://git.funnyviki.com'
+        # Add any other gitlab.rb configuration here, each on its own line
     volumes:
-      - ./data/gitlab-ce/config/:/etc/gitlab/
-      - ./data/gitlab-ce/logs/:/var/log/gitlab/
-      - ./data/gitlab-ce/data/:/var/opt/gitlab/
+      - ./data/gitlab-ce/config/:/etc/gitlab/ # 用于存储 GitLab 配置文件
+      - ./data/gitlab-ce/logs/:/var/log/gitlab/ # 用于存储日志
+      - ./data/gitlab-ce/data/:/var/opt/gitlab/ # 用于存储应用程序数据
+    shm_size: 0m
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","curl -s 127.0.0.1:80 > /dev/null 2>&1" ]
-
-  postgresql:
-    container_name: postgresql
-    image: postgres:latest
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: Ideal@015
-    volumes:
-      - ./data/postgresql/data/:/var/lib/postgresql/data/
-
-  redis:
-    container_name: redis
-    image: redis:latest
-    restart: always
-    command: redis-server /etc/redis/redis.conf
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./data/redis/data/:/data/
-      - ./data/redis/conf/redis.conf:/etc/redis/redis.conf
-    sysctls:
-      net.core.somaxconn: 1024

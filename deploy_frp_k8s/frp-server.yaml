@@ -1,0 +1,82 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frp-server
+spec:
+  ports:
+    - name: frp-server
+      nodePort: 7000
+      port: 7000
+      protocol: TCP
+      targetPort: server
+    - name: frp-server-web
+      nodePort: 7001
+      port: 7001
+      protocol: TCP
+      targetPort: server-web
+    - name: frp-client-7002
+      nodePort: 7002
+      port: 7002
+      protocol: TCP
+      targetPort: client-7002
+    - name: frp-client-7003
+      nodePort: 7003
+      port: 7003
+      protocol: TCP
+      targetPort: client-7003
+  selector:
+    app: frp-server
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frp-server
+spec:
+  selector:
+    matchLabels:
+      app: frp-server
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: frp-server
+    spec:
+      containers:
+        - name: frp-server
+          image: registry.cn-hangzhou.aliyuncs.com/linxh/frps:v0.42.0
+          imagePullPolicy: Always
+          ports:
+            - name: server
+              containerPort: 7000
+              protocol: TCP
+            - name: server-web
+              containerPort: 7001
+              protocol: TCP
+            - name: client-7002
+              containerPort: 7002
+              protocol: TCP
+            - name: client-7003
+              containerPort: 7003
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 7000
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 7000
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: frp-server-configmap
+              mountPath: /etc/frp/frps.ini
+              subPath: frps.ini
+      volumes:
+        - name: frp-server-configmap
+          configMap:
+            name: frp-server-cm

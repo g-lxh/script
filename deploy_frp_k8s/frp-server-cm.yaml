@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frp-server-cm
+data:
+  frps.ini: |
+    [common]
+    # 用于客户端连接的端口
+    bind_port = 7000
+    # 秘钥
+    token = meiyoumima
+    # 非对称加密
+    tls_only = true
+    # dashboard端口、用户名、密码
+    dashboard_port = 7001
+    dashboard_user = admin
+    dashboard_pwd = meiyoumima

@@ -1,0 +1,123 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get" ]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+subjects:
+  - kind: ServiceAccount
+    name: jenkins
+    namespace: common
+roleRef:
+  kind: Role
+  name: jenkins
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      terminationGracePeriodSeconds: 10
+      # 注意：k8s 1.21.x 中 serviceAccount 改名为 serviceAccountName
+      # 这里填写上面创建的 serviceAccount 的 name
+      serviceAccountName: jenkins
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:2.340
+          command: [ "/bin/sh", "-c", "mkdir -p ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && cp -r -n /usr/share/jenkins/* ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && tini -- /usr/local/bin/jenkins.sh" ]
+          imagePullPolicy: Always
+          env:
+            - name: JENKINS_WAR
+              value: /var/jenkins_home/jenkins/jenkins.war
+            - name: REF
+              value: /var/jenkins_home/jenkins/ref
+          ports:
+            - name: web
+              containerPort: 8080
+              protocol: TCP
+            - name: agent
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: jenkins-persistent-storage
+              mountPath: /var/jenkins_home/
+              subPath: jenkins_home
+            - name: jenkins-persistent-storage
+              mountPath: /usr/local/rely/
+              subPath: rely
+      volumes:
+        - name: jenkins-persistent-storage
+          persistentVolumeClaim:
+            claimName: jenkins-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  selector:
+    app: jenkins
+  type: NodePort
+  ports:
+    - name: web
+      port: 8080
+      nodePort: 30010
+      targetPort: web
+    - name: agent
+      port: 50000
+      nodePort: 30011
+      targetPort: agent

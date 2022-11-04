@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frp-client
+spec:
+  selector:
+    matchLabels:
+      app: frp-client
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: frp-client
+    spec:
+      containers:
+        - name: frp-client
+          image: registry.cn-hangzhou.aliyuncs.com/linxh/frpc:v0.42.0
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: frp-client-configmap
+              mountPath: /etc/frp/frpc.ini
+              subPath: frpc.ini
+      volumes:
+        - name: frp-client-configmap
+          configMap:
+            name: frp-client-cm

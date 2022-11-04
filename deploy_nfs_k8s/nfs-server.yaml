@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: nfs-server
-          image: gists/nfs-server
+          image: gists/nfs-server:2.6.1
           imagePullPolicy: Always
           env:
             - name: NFS_DOMAIN
@@ -90,9 +90,12 @@ spec:
               name: nfs-server
       restartPolicy: Always
       nodeSelector:
-        kubernetes.io/hostname: master-001
+        kubernetes.io/hostname: master-050 # 绑定到 nfs 所在节点
+      tolerations: # 可以容忍调度到 master 节点
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"
       volumes:
         - hostPath:
-            path: /mnt/nfs
+            path: /mnt/data/nfs
             type: DirectoryOrCreate
           name: nfs-server

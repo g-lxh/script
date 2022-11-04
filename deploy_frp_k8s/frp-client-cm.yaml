@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frp-client-cm
+data:
+  frpc.ini: |
+    [common]
+    # 服务端外部访问ip
+    server_addr = home.l-xh.com
+    # 服务外部访问端口，用于连接
+    server_port = 7000
+    # token 认证
+    token = meiyoumima
+    tls_enable = true
+
+    [ssh-7002]
+    type = tcp
+    # 启用TCP健康检查
+    health_check_type = tcp
+    # TCPing超时秒
+    health_check_timeout_s = 3
+    # 如果健康检查失败在连续3次，则该代理将来自FRPS移除
+    health_check_max_failed = 3
+    # 每 10 秒进行一次健康检查
+    health_check_interval_s = 10
+    local_ip = 10.10.8.5
+    local_port = 22
+    # 本地22端口被服务器7001端口代理
+    remote_port = 7002

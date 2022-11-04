@@ -8,20 +8,20 @@ x-default-healthcheck: &default-healthcheck
 services:
   jenkins:
     container_name: jenkins
-    image: jenkins/jenkins:latest
+    image: jenkins/jenkins:2.331
     restart: always
     entrypoint:
       - /bin/sh
       - -c
-      - cp -r -f /usr/share/jenkins/ ${JENKINS_HOME:-/var/jenkins_home/}jenkins/ && tini -- /usr/local/bin/jenkins.sh
+      - cp -r -f /usr/share/jenkins/ ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && tini -- /usr/local/bin/jenkins.sh
     ports:
       - "8080:8080"
     environment:
       JAVA_HOME: /usr/local/rely/jdk1.8.0_171
       MAVEN_HOME: /usr/local/rely/apache-maven-3.5.0
       NODE_HOME: /usr/local/rely/node-v16.14.0-linux-x64
-      JENKINS_WAR: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/jenkins.war
-      REF: ${JENKINS_HOME:-/var/jenkins_home/}jenkins/ref
+      JENKINS_WAR: ${JENKINS_HOME:-/var/jenkins_home}/jenkins/jenkins.war
+      REF: ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ref
     volumes:
       - ./data/jenkins/:/var/jenkins_home/
       - ./rely/:/usr/local/rely/

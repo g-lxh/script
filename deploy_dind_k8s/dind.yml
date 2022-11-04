@@ -1,0 +1,64 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dind
+spec:
+  selector:
+    name: dind
+  ports:
+    - protocol: TCP
+      port: 2375
+      targetPort: 2375
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dind
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: dind
+  template:
+    metadata:
+      labels:
+        name: dind
+    spec:
+      containers:
+        - name: dind
+          image: docker:20.10.18-dind
+          args: [ "--insecure-registry=$(REGISTRY)" ]
+          env:
+            - name: REGISTRY
+              value: hub.l-xh.com
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+            - name: DOCKER_HOST
+              value: tcp://127.0.0.1:2375
+          securityContext:
+            # 必须以特权启动
+            privileged: true
+          tty: true
+          volumeMounts:
+            - name: dind-persistent-storage
+              mountPath: /usr/bin/docker
+              subPath: bin
+            - name: dind-persistent-storage
+              mountPath: /run
+              subPath: run
+          readinessProbe:
+            exec:
+              command: [ "docker", "info" ]
+            initialDelaySeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: [ "docker", "info" ]
+            initialDelaySeconds: 60
+            failureThreshold: 10
+      volumes:
+        - name: dind-persistent-storage
+          persistentVolumeClaim:
+            claimName: dind-pv-claim

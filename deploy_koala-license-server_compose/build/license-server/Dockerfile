@@ -8,6 +8,6 @@ RUN set -eux; \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime; \
     echo $TZ > /etc/timezone
 # 应用程序
-ADD license-server-1.0-SNAPSHOT.jar /usr/local/license-server/license-server-1.0-SNAPSHOT.jar
+ADD license-server-2.0-SNAPSHOT.jar /usr/local/license-server/license-server-2.0-SNAPSHOT.jar
 EXPOSE 4010
-CMD java -jar /usr/local/license-server/license-server-1.0-SNAPSHOT.jar 
+CMD java -jar /usr/local/license-server/license-server-2.0-SNAPSHOT.jar

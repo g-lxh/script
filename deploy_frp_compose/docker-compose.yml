@@ -6,17 +6,37 @@ x-default-healthcheck: &default-healthcheck
   start_period: 10s
 
 services:
-  frp-server:
+  frps:
     build:
-      context: build/frp-server
+      context: build/frps
       dockerfile: Dockerfile
-    container_name: frp-server
-    image: registry.cn-hangzhou.aliyuncs.com/linxh/frp-server:latest
+    container_name: frps
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/frps:v0.42.0
     restart: always
     ports:
       - "7000-7050:7000-7050"
-    environment:
-      FRP_TOKEN: 123
+    volumes:
+      - .${PWD}/.frps.ini:/etc/frp/frps.ini
     healthcheck:
       <<: *default-healthcheck
       test: [ "CMD-SHELL","nc -z 127.0.0.1 7000" ]
+
+  frpc:
+    build:
+      context: build/frpc
+      dockerfile: Dockerfile
+    container_name: frpc
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/frpc:v0.42.0
+    restart: always
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 7000" ]
+
+# nerdctl run -d --name frpc -v ./.frpc.ini:/etc/frp/frpc.ini registry.cn-hangzhou.aliyuncs.com/linxh/frpc:v0.42.0
+# nerdctl run --name frpc --rm -it registry.cn-hangzhou.aliyuncs.com/linxh/frpc:v0.42.0 sh
+
+
+# ctr c create registry.cn-hangzhou.aliyuncs.com/linxh/frpc:v0.42.0 frpc --mount type=bind,src=.frpc.ini,dst=/etc/frp/frpc.ini,options=rbind:rw
+
+# ctr -n k8s.io c create docker.io/library/busybox:latest busybox-2 --mount type=bind,src=/tmp,dst=/host,options=rbind:rw
+# ctr run -d docker.io/library/redis:alpine3.13 redis

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- <meta name="format-detection" content="telephone=no">  忽略自动识别电话 -->
+    <!-- <meta name="format-detection" content="email=no">    忽略自动识别邮箱 -->
+    <!-- <meta name="format-detection" content="telephone=no, email=no">   忽略自动识别电话和邮箱 -->
+    <!-- <meta http-equiv="Cache-Control" content="no-cache">  禁止浏览器缓存 -->
+    <!-- <meta name="renderer" content="webkit">   开启360浏览器极速模式 -->
+    <!-- <link rel="apple-touch-icon" sizes="76x76" href="logo.png">      保存网站到桌面时添加图标 -->
+    <!-- <link rel="apple-touch-icon-precomposed" href="logo.png">     保存网站到桌面时添加图标且清除默认光泽 -->
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet " href="css/index.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://fonts.font.im/css?family=Noto+Sans+SC:300,400,500,700">
+    <title>考拉悠然</title>
+    <script>
+        function fontSize() {
+            let doc = document.documentElement,
+                resizeEvt = "orientationchange" in window ? "orientationchange" : "resize",
+                recalc = function () {
+                    let winW = doc.clientWidth,
+                        size;
+                    if (!winW) return;
+
+                    if (winW <= 1750 && winW > 1250) {
+                        size = Math.round(winW / 17.5);
+                    } else if(winW <= 1250 && winW > 800){
+                        size = Math.round(winW / 14.5); 
+                    }
+                    else if (winW <= 800) {
+                        size = Math.round(winW / 7.5);
+                        if (size > 65) {
+                            size = 65;
+                        }
+                    } else {
+                        size = 100;
+                    };
+                    doc.style.fontSize = size + 'px';
+                };
+            if (!document.addEventListener) return;
+            window.addEventListener(resizeEvt, recalc, false);
+            document.addEventListener("DOMContentLoaded", recalc, false);
+        };
+        fontSize();
+    </script>
+    <script src="js/polyfill/browser.min.js"></script>
+    <script>
+        var loadJS = function(url) {
+            var head = document.getElementsByTagName("head")[0];
+            var script = document.createElement("script");
+            script.src = url;
+            var done = false;
+            script.onload = script.onreadystatechange = function() {
+                if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")) {
+                    done = true;
+                    script.onload = script.onreadystatechange = null;
+                    head.removeChild(script);
+                }
+            };
+            head.appendChild(script);
+        };
+        if (!!window.ActiveXObject || "ActiveXObject" in window){
+            loadJS("js/polyfill/polyfill.min.js");
+        }
+        if (!('IntersectionObserver' in window)) {
+            loadJS("js/polyfill/intersection-observer.js");
+        }
+        
+       
+    </script>
+</head>
+<body>
+    <div class="App">
+        <header>
+            <a href="index.html" class="logo">
+                <img src="img/logo.png" alt="">
+                <img src="img/logo_.png" alt="">
+            </a>
+            <ul>                                                                  
+                <li>
+                    <a>首页</a>
+                </li>
+                <li class="active">
+                    <a href="osmagic.html">osmagic码极客</a>
+                </li>
+                <li>
+                    <a href="javasctipt:void(0)">案例</a>
+                    <!-- <div class="otherside">
+                        <i class="iconfont">&#xe65d;</i>
+                        <a href="buddyFuneng.html">赋能模式</a>
+                        <a href="buddy.html">生态伙伴</a>
+                    </div> -->
+                </li>
+                <li>
+                    <a href="javasctipt:void(0)">用户指南</a>
+                    <!-- <div class="otherside">
+                        <i class="iconfont">&#xe65d;</i>
+                        <a href="prd.html">智慧城市</a>
+                        <a href="prd.html">智能制造</a>
+                        <a href="case.html">精选案例</a>
+                    </div> -->
+                </li>
+                <!-- <li>
+                    <a href="news.html">新闻中心</a>
+                </li>
+                <li>
+                    <a href="profile.html">关于我们</a>
+                </li> -->
+            </ul>
+            <div class="morelink">
+                <div class="tel">
+                    <a id="login">登录</a>
+                    <!-- <div class="otherside">
+                        <i class="iconfont">&#xe65d;</i>
+                        <a href="#">登出</a>
+                    </div> -->
+                </div>
+                <section class="mobileMenu">
+                    <div class="mobileMenu_box">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </section>
+            </div>
+        </header>
+        <section class="mobileNav">
+            <div class="box">
+                <div class="mobileNavitems">
+                    <div class="item link">
+                        <h5>首页</h5>
+                        <a href="index.html" class="linkA"></a>
+                    </div>
+                    <div class="mobilelinkitems"></div>
+                </div>
+                <div class="mobileNavitems">
+                    <div class="item link">
+                        <h5>osmagic码极客</h5>
+                        <a href="osmagic.html" class="linkA"></a>
+                    </div>
+                    <div class="mobilelinkitems">
+                    </div>
+                </div>
+                <div class="mobileNavitems">
+                    <div class="item link">
+                        <h5>生态伙伴</h5>
+                        <a href="buddy.html" class="linkA"></a>
+                    </div>
+                    <div class="mobilelinkitems">
+                    </div>
+                </div>
+                <div class="mobileNavitems">
+                    <div class="item link">
+                        <h5>解决方案与案例</h5>
+                        <i class="iconfont">&#xe65a;</i>
+                    </div>
+                    <div class="mobilelinkitems">
+                        <a href="prd.html">智慧城市</a>
+                        <a href="prd.html">智能制造</a>
+                        <a href="case.html">精选案例</a>
+                    </div>
+                </div>
+                <div class="mobileNavitems">
+                    <div class="item link">
+                        <h5>新闻中心</h5>
+                        <a href="news.html" class="linkA"></a>
+                    </div>
+                    <div class="mobilelinkitems">
+                    </div>
+                </div>
+                <div class="mobileNavitems">
+                    <div class="item link">
+                        <h5>关于我们</h5>
+                        <a href="profile.html" class="linkA"></a>
+                    </div>
+                    <div class="mobilelinkitems">
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="placeholder"></section>
+        <section class="subnavHead">
+            <div class="videoboxs">
+                <video autoplay muted loop x5-video-player-type="h5" playsinline="true" webkit-playsinline="true" x5-video-player-fullscreen="true" x-webkit-airplay="true" src="video/video.mp4" ></video>
+            </div>
+            <div class="need needVideo" data-src="video/video.mp4" data-icon="&#xe61d;">
+                <span>完整视频</span>
+                <i class="iconfont" >&#xe65d;</i>
+            </div>
+        </section>
+        <section class="osmagic">
+            <video muted autoplay loop x5-video-player-type="h5" playsinline="true" webkit-playsinline="true" x5-video-player-fullscreen="true" x-webkit-airplay="true" src="video/pattern.mp4" ></video>
+            <div class="w1200">
+                <figure class="y60 flags"><img src="img/osmagic/0.png" alt=""></figure>
+                <span class="line y60 flags"></span>
+                <p class="y60 flags">一个为垂直行业赋能面向未来的人工智能操作系统。它致力于让企业摆脱繁杂的算法、算力、数据整合工作，快速低成本地完成行业AI赋能，为其提供高性能、低门槛、可扩展的行业级AI解决方案，进而提升行业效率，创造社会价值。</p>
+            </div>
+            <div class="w1200" id="osmagicw1200">
+                <div class="items itemAnimates flags" randommax='700' random="1">
+                    <div class="item itemAnimate">
+                        <div class="dot">
+                            <div class="dotImg"></div>
+                        </div>
+                        <h6 class="fz24">能力平台</h6>
+                        <div style="display: flex;">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                        <i class="iconfont">&#xe65a;</i>
+                        <span>场景赋能 <br>
+                            快速调用 <br>
+                            算法快速接入 <br>
+                            多种原生算法
+                        </span>
+                        <div class="click">快速进入></div>
+                    </div>
+                    <div class="item itemAnimate">
+                        <div class="dot">
+                            <div class="dotImg1"></div>
+                        </div>
+                        <h6 class="fz24">运管平台</h6>
+                        <div style="display: flex;">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                        <i class="iconfont">&#xe65a;</i>
+                        <span>算法引擎 <br>
+                            自动扩容  <br>
+                            任务监控 <br>
+                            集群负载 
+                        </span>
+                        <div class="click">快速进入></div>
+                    </div>
+                    <div class="item itemAnimate">
+                        <div class="dot">
+                            <div class="dotImg2"></div>
+                        </div>
+                        <h6 class="fz24">学习平台</h6>
+                        <div style="display: flex;">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                        <i class="iconfont">&#xe65a;</i>
+                        <span>数据管理 <br>
+                            协同标注 <br>
+                            模型产出 <br>
+                            能力编排
+                        </span>
+                        <div class="click">快速进入></div>
+                    </div>
+                </div>
+            </div>
+            <div class="w1200" id="osmagicw1200">
+                <div class="items itemAnimates flags" randommax='700' random="1">
+                    <div class="item itemAnimate">
+                        <div class="dot">
+                            <div class="dotImg"></div>
+                        </div>
+                        <h6 class="fz24">访问控制平台</h6>
+                        <div style="display: flex;">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                        <i class="iconfont">&#xe65a;</i>
+                        <span>统一授权 <br>
+                            简单易用 <br>
+                            多平台接入 <br>
+                            统一规范标准
+                        </span>
+                        <div class="click" id="accountPlatform">快速进入></div>
+                    </div>
+                    <div class="item itemAnimate">
+                        <div class="dot">
+                            <div class="dotImg1"></div>
+                        </div>
+                        <h6 class="fz24">License授权平台</h6>
+                        <div style="display: flex;">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                        <i class="iconfont">&#xe65a;</i>
+                        <span>离线授权 <br>
+                            在线授权  <br>
+                            多结构性 <br>
+                            分销体系 
+                        </span>
+                        <div class="click">快速进入></div>
+                    </div>
+                    <div class="item itemAnimate">
+                        <div class="dot">
+                            <div class="dotImg2"></div>
+                        </div>
+                        <h6 class="fz24">流媒体服务平台</h6>
+                        <div style="display: flex;">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                        <i class="iconfont">&#xe65a;</i>
+                        <span> 标准协议<br>
+                            联级平台 <br>
+                            多方协议登录 <br>
+                            多媒体网关架构
+                        </span>
+                        <div class="click">快速进入></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="osmagicImg">
+            <div class="w1200">
+                <div class="demo-gallery y60 flags">
+                    <a href="img/osmagic/1.png" data-size="1200x76">
+                        <img src="img/osmagic/1.png" alt="">
+                    </a>
+                </div>
+                <div class="title y60 flags">
+                    <div class="list">
+                        <i class="iconfont">&#xe669;</i>
+                        <span>ISV</span>
+                    </div>
+                    <div class="list">
+                        <div class="icon iconfont">&#xe600;</div>
+                        <div class="icon iconfont">&#xe600;</div>
+                        <div class="icon iconfont">&#xe600;</div>
+                        <div class="icon iconfont">&#xe600;</div>
+                        <div class="icon iconfont">&#xe600;</div>
+                    </div>
+                    <div class="list">
+                        <i class="iconfont">&#xe669;</i>
+                        <span>集成商</span>
+                    </div>
+                </div> 
+                <div class="demo-gallery y60 flags">
+                    <a href="img/osmagic/2.png" data-size="1200x635">
+                        <img src="img/osmagic/2.png" alt="">
+                    </a>
+                </div>
+            </div>
+        </section>
+        <footer>
+            <div class="w1200">
+                <div class="listbox">
+                    <div class="list">
+                        <div class="text">
+                            <p>成都：成都市高新区天府五街200号菁蓉汇4A-10</p>
+                            <p>总机：400-661-9188</p>
+                        </div>
+                        
+                    </div> 
+                    <div class="list">
+                        <div class="text">
+                            <p>南京：南京市浦口区江浦街道新北路江北国际智谷A-8</p>
+                            <p>总机：400-661-9188</p>
+                        </div>
+                        <div class="othermsg">
+                            <span>Follow us：   </span>
+                            <a class="iconfont needWechat" data-src="img/wechat.png" data-text="扫一扫添加微信哟">&#xe65f;</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="textlist">
+                    <p><span>版权所有 © 考拉悠然科技 2012-2021     </span><span>All Rights Reserved.     </span><a href="">蜀ICP备17030574号-1</a></p>
+                </div>
+            </div>
+            <div class="scrollTo">top</div>
+        </footer>
+    </div>
+    <section class="fixedScreen flags"></section>
+    <div class="particles">
+        <div id="particles-js"></div>
+    </div>
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="pswp__bg">
+        </div>
+        <div class="pswp__scroll-wrap">
+            <div class="pswp__container">
+                <div class="pswp__item">
+                </div>
+                <div class="pswp__item">
+                </div>
+                <div class="pswp__item">
+                </div>
+            </div>
+            <div class="pswp__ui pswp__ui--hidden">
+                <div class="pswp__top-bar">
+                    <div class="pswp__counter">
+                    </div>
+                    <button class="pswp__button pswp__button--close iconfont" title="Close (Esc)">&#xe61d;</button>
+                    <button class="pswp__button pswp__button--share" title="Share">
+                    </button>
+                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen">
+                    </button>
+                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out">
+                    </button>
+                    <div class="pswp__preloader">
+                        <div class="pswp__preloader__icn">
+                            <div class="pswp__preloader__cut">
+                                <div class="pswp__preloader__donut">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                    <div class="pswp__share-tooltip">
+                    </div>
+                </div>
+                <button class="pswp__button pswp__button--arrow--left iconfont" title="Previous (arrow left)">&#xe65e;</button>
+                <button class="pswp__button pswp__button--arrow--right iconfont" title="Next (arrow right)">&#xe65a;</button>
+                <div class="pswp__caption">
+                    <div class="pswp__caption__center">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/plug/swiper.min.js"></script>
+    <script src='js/index.js'></script>
+    <script src="js/canvas/particles.js"></script>
+    <script src="js/canvas/app.js"></script>
+    <script src="js/plug/countUp.min.js"></script>
+    <script src="js/photoswipe/photoswipe-ui-default.min.js"></script>
+    <script src="js/photoswipe/photoswipe.min.js"></script>
+    <script src="js/photoswipe/index.js"></script>
+    <script>
+        var accountPlatform = document.getElementById('accountPlatform')
+        var login = document.getElementById('login')
+        accountPlatform.addEventListener('click',(e)=>{
+            if(localStorage.getItem('token')&&localStorage.getItem('url')){
+                window.open(localStorage.getItem('url'))
+            }
+        })
+        login.addEventListener('click',function(e){
+            window.location.href = location.origin+'/login?isLog='+(!localStorage.getItem('isLog'))
+            if(localStorage.getItem('isLog')){
+                login.innerText = '注销'
+                localStorage.setItem('isLog',false)
+            }else{
+                login.innerText = '登录'
+                localStorage.setItem('isLog',true)
+            }
+        })
+        if(localStorage.getItem('isLog')){
+            login.innerText = '注销'
+        }else{
+            login.innerText = '登录'
+        }
+    </script>
+    <script type="text/babel"> 
+
+        if(w >= 640){
+            let video = _$('video');
+            for(let i = 0;i<video.length;i++){
+                video[i].setAttribute('autoplay','true');
+            }
+        };
+
+        (()=>{
+            var $circle = document.querySelector('.ani');
+            var generateTranslate = function generateTranslate(el, e, value) {
+                el.style.transform = 'translate(' + e.clientX * value + 'px, ' + e.clientY * value + 'px)';
+            };
+            var cumulativeOffset = function cumulativeOffset(element) {
+                var top = 0,
+                    left = 0;
+                do {
+                    top += element.offsetTop || 0;
+                    left += element.offsetLeft || 0;
+                    element = element.offsetParent;
+                } while (element);
+                return {
+                    top: top,
+                    left: left
+                };
+            };
+            function businessIbox(){
+                if(w>1024){
+                    var e = event || window.event;
+                    var x = (e.pageX - cumulativeOffset($circle).left - 350 / 2) * -1 / 100;
+                    var y = (e.pageY - cumulativeOffset($circle).top - 350 / 2) * -1 / 100;
+                    var matrix = [[1, 0, 0, -x * 0.00002], [0, 1, 0, -y * 0.00002], [0, 0, 1, 1], [0, 0, 0, 1]];
+                    generateTranslate($circle, e, 0.05);
+                    $circle.style.transform = 'matrix3d(' + matrix.toString() + ')';
+                }
+            }
+            document.onmousemove = businessIbox;
+        })();
+
+        numScroll(_('#count1'),_('#count1').getAttribute('data'));
+        numScroll(_('#count2'),_('#count2').getAttribute('data'));
+
+    </script>
+</body>
+</html>

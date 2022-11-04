@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-plugins-picture
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-plugins-picture
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: java-plugins-picture
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+            -XX:MaxRAMFraction=1 -Dfile.encoding=UTF-8 -Xmx2G -Xms2G -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+        image: hub.kaolayouran.cn:5000/osmagic-all/plugins-picture:20220908105805-1106
+        imagePullPolicy: Always
+        name: plugins-picture
+        ports:
+        - containerPort: 8080
+          name: api
+          protocol: TCP
+      restartPolicy: Always
