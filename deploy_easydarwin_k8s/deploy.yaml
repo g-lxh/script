@@ -1,0 +1,50 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: easydarwin
+spec:
+  selector:
+    name: easydarwin
+  ports:
+    - name: rtsp
+      port: 554
+      nodePort: 554
+      targetPort: rtsp
+    - name: http
+      port: 10008
+      nodePort: 10008
+      targetPort: http
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: easydarwin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: easydarwin
+  template:
+    metadata:
+      labels:
+        name: easydarwin
+    spec:
+      containers:
+        - name: easydarwin
+          image: registry.cn-hangzhou.aliyuncs.com/linxh/easydarwin:8.1.0
+          ports:
+            - name: rtsp
+              containerPort: 554
+              protocol: TCP
+            - name: http
+              containerPort: 10008
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 10008
+          livenessProbe:
+            tcpSocket:
+              port: 10008

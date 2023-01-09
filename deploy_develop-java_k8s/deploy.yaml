@@ -1,0 +1,53 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: develop-java8
+spec:
+  selector:
+    name: develop-java8
+  ports:
+    - name: ssh
+      port: 22
+      nodePort: 2222
+      targetPort: ssh
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: develop-java8
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: develop-java8
+  template:
+    metadata:
+      labels:
+        name: develop-java8
+    spec:
+      containers:
+        - name: develop-java8
+          image: openjdk:8u312-jdk
+          command: [ "/bin/bash", "-c", "sed -n '/^[^#].*/p' /etc/apt/sources.list &&
+          sed -i 's#deb.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list &&
+          sed -i 's#security.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list &&
+          apt update &&
+          apt install -y openssh-server &&
+          sed -n '/^#PermitRootLogin.*/p' /etc/ssh/sshd_config &&
+          sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config &&
+          echo \"root:.\" | chpasswd &&
+          service ssh restart &&
+          sleep 100000 " ]
+          ports:
+            - name: ssh
+              containerPort: 22
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 22
+          livenessProbe:
+            tcpSocket:
+              port: 22

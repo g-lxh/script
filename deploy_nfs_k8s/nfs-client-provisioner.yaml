@@ -35,7 +35,7 @@ subjects:
   - kind: ServiceAccount
     name: nfs-client-provisioner
     # replace with namespace where provisioner is deployed
-    namespace: kube-system
+    namespace: nfs
 roleRef:
   kind: ClusterRole
   name: nfs-client-provisioner-runner
@@ -93,11 +93,11 @@ spec:
             - name: PROVISIONER_NAME
               value: k8s-sigs.io/nfs-subdir-external-provisioner
             - name: NFS_SERVER
-              value: 10.106.240.22
+              value: 10.96.3.68
             - name: NFS_PATH
               value: /
       volumes:
         - name: nfs-client-root
           nfs:
-            server: 10.106.240.22
+            server: 10.96.3.68
             path: /

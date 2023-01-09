@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ql
+spec:
+  ports:
+    - name: web
+      port: 5700
+      nodePort: 5700
+      protocol: TCP
+      targetPort: web
+  selector:
+    app: ql
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ql
+spec:
+  selector:
+    matchLabels:
+      app: ql
+  template:
+    metadata:
+      labels:
+        app: ql
+    spec:
+      containers:
+        - name: ql
+          image: whyour/qinglong:latest
+          ports:
+            - name: web
+              containerPort: 5700
+              protocol: TCP

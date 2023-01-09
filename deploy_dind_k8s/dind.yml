@@ -29,11 +29,11 @@ spec:
       containers:
         - name: dind
           image: docker:20.10.18-dind
-          args: [ "--insecure-registry=$(REGISTRY)" ]
+          args: [ "--insecure-registry=$(REGISTRY)", "--iptables=false" ]
           env:
             - name: REGISTRY
-              value: hub.l-xh.com
-            - name: DOCKER_TLS_CERTDIR
+              value: hub.kaolayouran.cn:5000
+            - name: DOCKER_TLS_CERTDIR # 默认以 TLS 启动, 监听端口 2376; 设置 DOCKER_TLS_CERTDIR 为空则就以非 TLS 模式启动, 监听端口 2375
               value: ""
             - name: DOCKER_HOST
               value: tcp://127.0.0.1:2375
@@ -42,12 +42,15 @@ spec:
             privileged: true
           tty: true
           volumeMounts:
-            - name: dind-persistent-storage
-              mountPath: /usr/bin/docker
+            - name: dind-temporary-storage
+              mountPath: /usr/local/bin/ # docker 可执行程序
               subPath: bin
-            - name: dind-persistent-storage
-              mountPath: /run
+            - name: dind-temporary-storage
+              mountPath: /var/run # docker 通信
               subPath: run
+            - name: dind-persistent-storage
+              mountPath: /var/lib/docker/ # docker 数据目录
+              subPath: docker
           readinessProbe:
             exec:
               command: [ "docker", "info" ]
@@ -59,6 +62,8 @@ spec:
             initialDelaySeconds: 60
             failureThreshold: 10
       volumes:
+        - name: dind-temporary-storage
+          emptyDir: { }
         - name: dind-persistent-storage
           persistentVolumeClaim:
             claimName: dind-pv-claim

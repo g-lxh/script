@@ -7,11 +7,8 @@ x-default-healthcheck: &default-healthcheck
 
 services:
   easydarwin:
-    build:
-      context: build
-      dockerfile: Dockerfile
     container_name: easydarwin
-    image: registry.cn-hangzhou.aliyuncs.com/linxh/easydarwin:latest
+    image: registry.cn-hangzhou.aliyuncs.com/linxh/easydarwin:8.1.0
     restart: always
     ports:
       - "554:554"

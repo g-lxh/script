@@ -14,9 +14,18 @@ metadata:
   labels:
     app: jenkins
 rules:
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
-    verbs: [ "get" ]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create","delete","get","list","patch","update","watch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create","delete","get","list","patch","update","watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get","list","watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,7 +37,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: jenkins
-    namespace: common
+    namespace: jenkins
 roleRef:
   kind: Role
   name: jenkins
@@ -49,7 +58,6 @@ spec:
       labels:
         app: jenkins
     spec:
-      terminationGracePeriodSeconds: 10
       # 注意：k8s 1.21.x 中 serviceAccount 改名为 serviceAccountName
       # 这里填写上面创建的 serviceAccount 的 name
       serviceAccountName: jenkins
@@ -63,6 +71,9 @@ spec:
               value: /var/jenkins_home/jenkins/jenkins.war
             - name: REF
               value: /var/jenkins_home/jenkins/ref
+          securityContext:
+            # root 启动, 使用 docker 时必须设置, 否则无权限; 暂时配置, 后续考虑 docker 非 root 运行
+            runAsUser: 0
           ports:
             - name: web
               containerPort: 8080
@@ -72,22 +83,22 @@ spec:
               protocol: TCP
           resources:
             limits:
-              cpu: 2000m
+              cpu: 4000m
               memory: 4Gi
             requests:
               cpu: 500m
               memory: 512Mi
           livenessProbe:
-            httpGet:
-              path: /login
+            tcpSocket:
               port: 8080
             initialDelaySeconds: 60
+            periodSeconds: 30
             timeoutSeconds: 5
           readinessProbe:
-            httpGet:
-              path: /login
+            tcpSocket:
               port: 8080
             initialDelaySeconds: 60
+            periodSeconds: 30
             timeoutSeconds: 5
           volumeMounts:
             - name: jenkins-persistent-storage
@@ -96,7 +107,47 @@ spec:
             - name: jenkins-persistent-storage
               mountPath: /usr/local/rely/
               subPath: rely
+            - name: jenkins-temporary-storage
+              mountPath: /usr/local/sbin/
+              subPath: bin
+            - name: jenkins-temporary-storage
+              mountPath: /var/run/ # docker 通信
+              subPath: run
+        - name: dind
+          image: docker:20.10.18-dind
+          command: [ "/bin/sh", "-c", "mkdir -p /usr/local/sbin/ && cp -r /usr/local/bin/docker /usr/local/sbin/ && /usr/local/bin/dockerd-entrypoint.sh" ]
+          args: [ "--insecure-registry=$(REGISTRY)", "--iptables=false" ]
+          env:
+            - name: REGISTRY
+              value: hub.kaolayouran.cn:5000
+            - name: DOCKER_TLS_CERTDIR # 默认以 TLS 启动, 监听端口 2376; 设置 DOCKER_TLS_CERTDIR 为空则就以非 TLS 模式启动, 监听端口 2375
+              value: ""
+            - name: DOCKER_HOST
+              value: tcp://127.0.0.1:2375
+          securityContext:
+            # 必须以特权启动
+            privileged: true
+          tty: true
+          volumeMounts:
+            - name: jenkins-temporary-storage
+              mountPath: /usr/local/sbin/ # docker 可执行程序
+              subPath: bin
+            - name: jenkins-temporary-storage
+              mountPath: /var/run/ # docker 通信
+              subPath: run
+          readinessProbe:
+            exec:
+              command: [ "docker", "info" ]
+            initialDelaySeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: [ "docker", "info" ]
+            initialDelaySeconds: 60
+            failureThreshold: 10
       volumes:
+        - name: jenkins-temporary-storage
+          emptyDir: { }
         - name: jenkins-persistent-storage
           persistentVolumeClaim:
             claimName: jenkins-pv-claim
