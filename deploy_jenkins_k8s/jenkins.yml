@@ -14,18 +14,18 @@ metadata:
   labels:
     app: jenkins
 rules:
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["create","delete","get","list","patch","update","watch"]
-  - apiGroups: [""]
-    resources: ["pods/exec"]
-    verbs: ["create","delete","get","list","patch","update","watch"]
-  - apiGroups: [""]
-    resources: ["pods/log"]
-    verbs: ["get","list","watch"]
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get"]
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
+    verbs: [ "create","delete","get","list","patch","update","watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "pods/exec" ]
+    verbs: [ "create","delete","get","list","patch","update","watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "pods/log" ]
+    verbs: [ "get","list","watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get" ]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -61,9 +61,13 @@ spec:
       # 注意：k8s 1.21.x 中 serviceAccount 改名为 serviceAccountName
       # 这里填写上面创建的 serviceAccount 的 name
       serviceAccountName: jenkins
+      hostAliases:
+        - ip: "192.168.2.196"
+          hostnames:
+            - "hub.kaolayouran.cn"
       containers:
         - name: jenkins
-          image: jenkins/jenkins:2.340
+          image: jenkins/jenkins:2.393
           command: [ "/bin/sh", "-c", "mkdir -p ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && cp -r -n /usr/share/jenkins/* ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && tini -- /usr/local/bin/jenkins.sh" ]
           imagePullPolicy: Always
           env:
@@ -84,7 +88,7 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 4Gi
+              memory: 8Gi
             requests:
               cpu: 500m
               memory: 512Mi
@@ -108,33 +112,37 @@ spec:
               mountPath: /usr/local/rely/
               subPath: rely
             - name: jenkins-temporary-storage
-              mountPath: /usr/local/sbin/
+              mountPath: /usr/local/sbin/ # docker 可执行程序
               subPath: bin
             - name: jenkins-temporary-storage
               mountPath: /var/run/ # docker 通信
               subPath: run
         - name: dind
-          image: docker:20.10.18-dind
-          command: [ "/bin/sh", "-c", "mkdir -p /usr/local/sbin/ && cp -r /usr/local/bin/docker /usr/local/sbin/ && /usr/local/bin/dockerd-entrypoint.sh" ]
-          args: [ "--insecure-registry=$(REGISTRY)", "--iptables=false" ]
+          image: docker:dind
+          # 为了便于在 jenkins 中使用 docker 命令, 将 docker 命令复制到 /usr/local/sbin/ 下, 然后再手动启动 docker 进程, 配置 insecure-registry 忽略SSL校验; registry-mirror 加速器
+          command: [ "/bin/sh", "-c", "mkdir -p /usr/local/sbin/ && cp -r /usr/local/bin/docker /usr/local/sbin/ && /usr/local/bin/dockerd-entrypoint.sh dockerd --insecure-registry=$(REGISTRY) --iptables=false --registry-mirror=https://bgus3lrj.mirror.aliyuncs.com" ]
           env:
             - name: REGISTRY
               value: hub.kaolayouran.cn:5000
             - name: DOCKER_TLS_CERTDIR # 默认以 TLS 启动, 监听端口 2376; 设置 DOCKER_TLS_CERTDIR 为空则就以非 TLS 模式启动, 监听端口 2375
               value: ""
-            - name: DOCKER_HOST
-              value: tcp://127.0.0.1:2375
           securityContext:
             # 必须以特权启动
             privileged: true
           tty: true
           volumeMounts:
+            - name: jenkins-persistent-storage
+              mountPath: /var/jenkins_home/ # 将 jenkins 的工作目录也挂载到 dind 中, 避免使用 docker -v 时找不到对应目录
+              subPath: jenkins_home
             - name: jenkins-temporary-storage
               mountPath: /usr/local/sbin/ # docker 可执行程序
               subPath: bin
             - name: jenkins-temporary-storage
               mountPath: /var/run/ # docker 通信
               subPath: run
+            - name: jenkins-persistent-storage
+              mountPath: /root/.m2/ # Maven 依赖
+              subPath: .m2
           readinessProbe:
             exec:
               command: [ "docker", "info" ]
@@ -146,7 +154,7 @@ spec:
             initialDelaySeconds: 60
             failureThreshold: 10
       volumes:
-        - name: jenkins-temporary-storage
+        - name: jenkins-temporary-storage # 存放 docker 可执行程序和 docker 通信的 socket
           emptyDir: { }
         - name: jenkins-persistent-storage
           persistentVolumeClaim:

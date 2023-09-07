@@ -1,0 +1,47 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: develop-python
+spec:
+  selector:
+    name: develop-python
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22
+      nodePort: 30001
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: develop-python
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: develop-python
+  template:
+    metadata:
+      labels:
+        name: develop-python
+    spec:
+      containers:
+        - name: develop-python
+          image: pytorch/pytorch:1.7.1-cuda11.0-cudnn8-devel
+          command:
+            - /bin/sh
+            - -c
+            - |
+              /etc/init.d/ssh restart && \
+              tail -f /dev/null
+          readinessProbe:
+            tcpSocket:
+              port: 22
+            initialDelaySeconds: 30
+          livenessProbe:
+            tcpSocket:
+              port: 22
+            initialDelaySeconds: 60

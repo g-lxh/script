@@ -1,0 +1,61 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  ai-man-proxy: # 代理
+    build:
+      context: build
+      dockerfile: Dockerfile-nginx
+    container_name: ai-man-proxy
+    image: registry.cn-chengdu.aliyuncs.com/l-xh/nginx:1.24.0
+    restart: always
+    ports:
+      - "1122:80"
+      - "443"
+      - "43306:3306"
+    volumes:
+      # - ./data/nginx/ssl/:/etc/ssl/private/ # 配置用于https秘钥,如果有则开启
+      - ./data/nginx/conf.d/:/etc/nginx/conf.d/ # 存放 http 和 stream 配置, 具体配置参考: nginx.conf include
+      - ./data/nginx/html/:/usr/share/nginx/html/ # Web 页面
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.01'
+          memory: 10M
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s http://127.0.0.1:80 > /dev/null 2>&1" ]
+
+  ai-man-mysql: # 数据库
+    container_name: ai-man-mysql
+    image: mysql:8.0.34
+    restart: always
+    # 查看完整可用选项: docker run -it --rm mysql:8.0.34 --verbose --help
+    command: --default-time-zone="+8:00" --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION --max-connections=10240 --log_error_verbosity=3 --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    ports:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: XkxV3pxdS3VngB%g2fy8pm5CdR6zcvfn
+      TZ: Asia/Shanghai # 针对容器本身时区控制
+    volumes:
+      - ./data/mysql/:/var/lib/mysql/
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.1'
+          memory: 100M
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","mysqladmin ping -h localhost  -p${MYSQL_ROOT_PASSWORD}" ]
+
+

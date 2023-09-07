@@ -4,4 +4,5 @@ services:
     build:
       context: build
       dockerfile: Dockerfile
-    image: hub.koalauran.cn:30003/component/sjqzhang/go-fastdfs:v1.4.3
+    # image: hub.koalauran.cn:30003/component/sjqzhang/go-fastdfs:v1.4.4_no-certification
+    image: hub.kaolayouran.cn:5000/osmagic-all/go-fastdfs:v1.4.4_no-certification

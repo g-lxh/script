@@ -16,6 +16,7 @@ services:
     ports:
       - "12000:12000"
     environment:
+      SERVER_PORT: 8080
       LOGGING_LEVEL_COM_KOALA_LICENSE: trace
     volumes:
       - ./data/h2/:/root/H2/

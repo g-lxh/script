@@ -1,0 +1,62 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: common-store-sql-mysql
+spec:
+  ports:
+    - name: mysql
+      nodePort: 43306
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+  selector:
+    app: mysql
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: common-store-sql-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0.34
+          imagePullPolicy: Always
+          # 查看完整可用选项: docker run -it --rm mysql:8.0.34 --verbose --help
+          args:
+            - --default-time-zone=+8:00
+            - --default-authentication-plugin=mysql_native_password
+            - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+            - --max-connections=10240
+            - --log_error_verbosity=3
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: Koala_MySQL#20Xx..A..
+          ports:
+            - containerPort: 3306
+              name: mysql
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/mysql/
+              name: mysql-persistent-storage
+              subPath: data
+      imagePullSecrets:
+        - name: harbor-image-pull-secret
+      restartPolicy: Always
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim

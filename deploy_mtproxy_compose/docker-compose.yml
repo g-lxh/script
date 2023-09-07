@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  mtproxy:
+    container_name: mtproxy
+    image: mtproxy/mtproxy
+    restart: always
+    ports:
+      - "30100:443"
+    environment:
+      SECRET: "cdfb09398c00bf4c4145ea091377469a" # 秘钥, 多个使用逗号分割, 使用 head -c 16 /dev/urandom | xxd -ps 生成
+    volumes:
+      - ./data/mtproxy/:/data/

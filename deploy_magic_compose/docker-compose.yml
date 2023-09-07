@@ -1,0 +1,56 @@
+version: '3'
+# 配置默认健康检查
+x-default-healthcheck: &default-healthcheck
+  interval: 30s # 检测时间间隔
+  timeout: 5s # 检测超时
+  retries: 2 # 重试次数
+  start_period: 10s # 启动后多久开始第一次检测
+
+services:
+  server:
+    container_name: java-license-client
+    image: hub.kaolayouran.cn:5000/osmagic/koala-license-client:2.2.0
+    restart: always
+    profiles: [ "mini" ]
+    ports:
+      - "30201:8080"
+    environment:
+      - MAIN=com.koalauran.license.client.LicenseClientApplication
+    volumes:
+      - ${PWD}/license-client/data/h2/:/root/H2/ # 数据持久化
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 8080" ]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          memory: 512M
+    networks:
+      - koala-magic
+  license-client-web:
+    container_name: web-license-client
+    image: hub.kaolayouran.cn:5000/osmagic/koala-license-client-web:2.2.0
+    restart: always
+    profiles: ["mini"]
+    ports:
+      - "30200:80"
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","curl -s 127.0.0.1:80 > /dev/null 2>&1" ]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          memory: 512M
+    networks:
+      - koala-magic
+
+
+networks:
+  koala-magic:
+    driver: bridge

@@ -1,0 +1,11 @@
+# MySQL访问地址
+upstream mysql {
+  server ai-man-mysql:3306;
+}
+server {
+  listen 3306;
+  proxy_connect_timeout 10s;
+  proxy_timeout 30s;
+  proxy_bind $server_addr:$remote_port; # 将访问发起者的IP和端口传递到下游服务
+  proxy_pass mysql; # 不建议直接在 proxy_pass 后面配置域名, 否则当域名IP变更后, 无法正常访问
+}

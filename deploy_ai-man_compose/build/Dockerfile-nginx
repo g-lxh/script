@@ -1,0 +1,50 @@
+ARG base_image=nginx:1.24.0
+## 构建
+FROM $base_image
+LABEL maintainer="lin"
+
+# 源更新
+RUN set -eux; \
+    sed -i 's#deb.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list; \
+    sed -i 's#security.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list; \
+    apt update -y
+
+# 时区
+ENV TZ=Asia/Shanghai
+RUN set -eux; \
+    apt install -y tzdata; \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime; \
+    echo $TZ > /etc/timezone
+
+# 工具集
+RUN set -eux; \
+    apt install -y vim wget telnet tcpdump net-tools
+
+# vim 鼠标模式转可视模式
+RUN set -eux; \
+    vim_default_path=$(find /usr/share/vim/ -name defaults.vim); \
+    sed -i 's/set mouse=.*/set mouse=""/' ${vim_default_path}
+
+# 缓存清除
+RUN set -eux; \
+    apt autoclean; \
+    apt clean
+
+# 添加 stream 支持，默认读取 /etc/nginx/conf.d/*.stream
+RUN echo "\nstream {\n\
+    "# see https://nginx.org/en/docs/varindex.html"\n\
+    log_format proxy '\$remote_addr [\$time_local] '\n\
+                     '\$protocol \$status \$bytes_sent \$bytes_received   '\n\
+                     '\$session_time \"\$upstream_addr\" '\n\
+                     '\"\$upstream_bytes_sent\" \"\$upstream_bytes_received\" \"\$upstream_connect_time\"';\n\n\
+    access_log /var/log/nginx/access.log proxy ;\n\n\
+    "# see https://nginx.org/en/docs/http/ngx_http_log_module.html#open_log_file_cache"\n\
+    open_log_file_cache max=1000 inactive=20s valid=1m min_uses=2;\n\n\
+    include /etc/nginx/conf.d/*.stream;\n\
+}" >> /etc/nginx/nginx.conf
+
+# 关闭 Nginx 版本信息
+RUN sed -i '/http {/ a\    server_tokens off;' /etc/nginx/nginx.conf
+
+# 支持中文
+ENV LANG=C.UTF-8

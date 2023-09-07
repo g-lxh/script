@@ -1,11 +1,10 @@
 ARG base_image=golang:alpine
 ## 构建
 FROM $base_image as builder
-LABEL maintainer="v.linxh@gmail.com"
+LABEL maintainer="lxh"
 
 ARG VERSION=0.42.0
 RUN set -xe;\
-    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories;\
 	apk update;\
 	apk add --no-cache --virtual .build-deps git zip make;\
 	mkdir -p /root/repo; cd /root/repo;\
