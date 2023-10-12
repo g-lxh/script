@@ -1,7 +1,7 @@
 ARG base_image=nginx:1.24.0
 ## 构建
 FROM $base_image
-LABEL maintainer="lin"
+LABEL maintainer="l-xh"
 
 # 源更新
 RUN set -eux; \
@@ -18,7 +18,7 @@ RUN set -eux; \
 
 # 工具集
 RUN set -eux; \
-    apt install -y vim wget telnet tcpdump net-tools
+    apt install -y vim wget telnet tcpdump net-tools inetutils-ping
 
 # vim 鼠标模式转可视模式
 RUN set -eux; \
@@ -48,3 +48,4 @@ RUN sed -i '/http {/ a\    server_tokens off;' /etc/nginx/nginx.conf
 
 # 支持中文
 ENV LANG=C.UTF-8
+ADD Dockerfile /Dockerfile

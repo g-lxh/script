@@ -1,0 +1,23 @@
+version: '3'
+x-default-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 2
+  start_period: 10s
+
+services:
+  minio:
+    container_name: minio
+    image: minio/minio
+    command: server /data --console-address :9001
+    restart: always
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: minio
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./data/:/data/
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","nc -z 127.0.0.1 9001" ]
