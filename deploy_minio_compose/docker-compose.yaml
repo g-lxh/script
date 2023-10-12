@@ -12,12 +12,17 @@ services:
     command: server /data --console-address :9001
     restart: always
     environment:
-      MINIO_ROOT_USER: root
-      MINIO_ROOT_PASSWORD: minio
+      MINIO_ROOT_USER: minioadmin # 默认用户名: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin # 默认密码: minioadmin
+      MINIO_SERVER_URL: http://10.10.1.51:9000 # 指定服务地址，避免分享地址为docker内部Ip
     ports:
       - "9001:9001"
+      - "9000:9000"
     volumes:
       - ./data/:/data/
     healthcheck:
       <<: *default-healthcheck
-      test: [ "CMD-SHELL","nc -z 127.0.0.1 9001" ]
+      test: [ "CMD-SHELL","curl -s http://127.0.0.1:9001 > /dev/null 2>&1" ]
+
+# 参考
+# https://kling.cn/detail/64013d92bac5b.html
