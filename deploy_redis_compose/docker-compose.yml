@@ -8,13 +8,23 @@ x-default-healthcheck: &default-healthcheck
 services:
   redis:
     container_name: redis
-    image: redis:latest
+    image: redis:7.2.1
     restart: always
-    command: redis-server /etc/redis/redis.conf
+    command: redis-server --requirepass ZpQZyRu3c3YcAspqa27V4bx!mKE^acyN
     ports:
       - "6379:6379"
+    expose:
+      - 6379
     volumes:
       - ./data/redis/data/:/data/
-      - ./data/redis/conf/redis.conf:/etc/redis/redis.conf
-    sysctls:
-      net.core.somaxconn: 1024
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.1'
+          memory: 100M
+    healthcheck:
+      <<: *default-healthcheck
+      test: [ "CMD-SHELL","redis-cli ping" ]
