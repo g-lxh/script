@@ -13,4 +13,4 @@ docker run -d \
   -e TZ="Asia/Shanghai" \
   -v ${base_path}/jenkins_home:/var/jenkins_home \
   -p 8080:8080 \
-  jenkins/jenkins:2.263.3-lts-centos7
+  jenkins/jenkins:2.426.2

@@ -67,7 +67,7 @@ spec:
             - "hub.kaolayouran.cn"
       containers:
         - name: jenkins
-          image: jenkins/jenkins:2.393
+          image: jenkins/jenkins:2.426.2
           command: [ "/bin/sh", "-c", "mkdir -p ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && cp -r -n /usr/share/jenkins/* ${JENKINS_HOME:-/var/jenkins_home}/jenkins/ && tini -- /usr/local/bin/jenkins.sh" ]
           imagePullPolicy: Always
           env:
